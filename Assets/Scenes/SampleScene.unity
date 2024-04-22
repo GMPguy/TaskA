@@ -153,7 +153,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Seed: 999999
-  MapSize: 10
+  MapSize: 180
   PushDist: 2
   POV: {fileID: 519420032}
   TestTile: {fileID: 1301830426865002716, guid: dca7a9a1b60a9f045acf20e22c7e82a1, type: 3}

@@ -15,7 +15,7 @@ public class WorldManager : MonoBehaviour {
     static Vector2 perlinOffset;
 
     // Cell info
-    const int MapSize = 200;
+    const int MapSize = 100;
     const int PushDist = 25;
     readonly int[] ParseSpeed = {100, 1000};
     Cell[,] Loaded;
@@ -63,7 +63,7 @@ public class WorldManager : MonoBehaviour {
     // test tiles
     public GameObject TestTile;
     GameObject[,] ttt;
-    Color[] biomeColors = {
+    public static Color[] biomeColors = {
         new(.75f, .75f, 0.5f), // 0 - Sand
         new(0.5f, 1f, 0f), // 1 - Plain
         new(1f, 1f, 0f), // 2 - Farms
@@ -151,7 +151,9 @@ public class WorldManager : MonoBehaviour {
             //Vis.GetComponent<SpriteRenderer>().color = Color.Lerp(new Color(0.5f, 1f, 0f), new Color(0f, 0.25f, 0f), target.Height);
             Vis.GetComponent<SpriteRenderer>().color = biomeColors[target.biome];//Color.Lerp(biomeColors[target.biome], biomeColors[target.biome]/10f, target.biomeSaturation);
             //Vis.GetComponent<SpriteRenderer>().color = Color.Lerp(Color.white, Color.red, getWater(target.getPos()) *12f);
+            //Vis.GetComponent<SpriteRenderer>().color = Color.Lerp(Color.white, Color.black, riverBias(target.getPos()));
         }
+        //Vis.GetComponent<SpriteRenderer>().color = Color.Lerp(Color.white, Color.black, riverBias(target.getPos()));
 
         Vis.transform.GetChild(0).GetComponent<TextMesh>().text = "x" + target.getPos().x + "\ny" + target.getPos().y + "\nw" + target.isWater;// + " / " + target.biomeSaturation;
     }
@@ -170,14 +172,15 @@ public class WorldManager : MonoBehaviour {
     // Stats monitor
 
     // World generation values
-    public static float[] islandMargin = {1f, -1f, 400};
-    public static float islandSize = 10;
-    public static float biomeSize = 160;
+    public static float[] islandMargin = {1f, -1f, 200};
+    public static float islandSize = 20;
+    public static float biomeSize = 320;
     public static float getHeight(Vector2 tilePos){
         return Mathf.Pow( erode((tilePos.x * 0.333f + perlinOffset.x) / islandSize, (tilePos.y * 0.333f + perlinOffset.y) / islandSize, 5f) , 2f );
     }
     public static float getContinent(Vector2 tilePos){
-        return Mathf.Clamp( Mathf.Lerp(islandMargin[0], islandMargin[1], Mathf.Pow( erode((tilePos.x * 0.333f + perlinOffset.x) / islandMargin[2], (tilePos.y * 0.333f + perlinOffset.y) / islandMargin[2], 0f) , 2f )) , 0f, 1f);
+        float land = Mathf.Pow( erode((tilePos.x * 0.333f + perlinOffset.x) / islandMargin[2], (tilePos.y * 0.333f + perlinOffset.y) / islandMargin[2], 0f) , 2f );
+        return Mathf.Clamp( Mathf.Lerp(islandMargin[0], islandMargin[1], land) , 0f, 1f);
     }
 
     public static int[,] biomeProgression = new int[7, 9]{
@@ -193,12 +196,24 @@ public class WorldManager : MonoBehaviour {
         float sector = erode((tilePos.x*3.333f + perlinOffset.x) / (biomeSize*10f), (tilePos.y*3.333f + perlinOffset.y) / (biomeSize*10f), 15f) * 6.9f;
         float partition = erode((tilePos.x * 3.333f + perlinOffset.y) / biomeSize, (tilePos.y * 3.333f + perlinOffset.x) / biomeSize, 10f) * Mathf.Clamp(getWater(tilePos, 1)*24f, 0f, 7.9f);
         //float partition = Mathf.Lerp(1f, Mathf.Clamp(7f, 0f, getWater(tilePos, 1)*14f), erode((tilePos.x * 3.333f + perlinOffset.y) / biomeSize, (tilePos.y * 3.333f + perlinOffset.x) / biomeSize, 1f) % 1f );
-        return new(biomeProgression[(int)sector, (int)partition], partition%1f);
+        try {
+            return new(biomeProgression[(int)sector, (int)partition], partition%1f);
+        } catch (Exception e) {
+            print("Biome progression breached " + sector + " - " + e);
+            return Vector2.zero;
+        }
         //return Mathf.Lerp(1f, Mathf.Clamp(7f, 0f, getWater(tilePos)*14f), erode((tilePos.x * 3.333f + perlinOffset.y) / biomeSize, (tilePos.y * 3.333f + perlinOffset.x) / biomeSize, 1f) % 1f );
+    }
+    public static float riverDensity = 1600f;
+    public static float[] riverMargin = {0.45f, 0.5f, 0.05f};
+    public static float riverBias(Vector2 Pos){
+        float riverBase = erode((Pos.y * 3.333f - perlinOffset.x) / riverDensity, (Pos.x * 3.333f - perlinOffset.y) / riverDensity, 5f);
+        if(riverBase >= riverMargin[0] && riverBase <= riverMargin[1]) return Mathf.Pow( Mathf.Sin((riverBase-riverMargin[0]) / riverMargin[2] * Mathf.PI) , 3f);
+        else return 0f;
     }
     public static float getWater(Vector2 Pos, int nega = -1){
         float perlin = getHeight(new(Pos.x, Pos.y));
-        float islandM = getContinent(new(Pos.x, Pos.y));
+        float islandM = getContinent(new(Pos.x, Pos.y)) + Mathf.Lerp(riverBias(Pos), 0f, perlin/2f);
         if(perlin < islandM) return perlin / (islandM*nega);
         else return (perlin - islandM) / (1f - islandM);
     }

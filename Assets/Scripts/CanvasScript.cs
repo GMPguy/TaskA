@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using static getStatic.WorldManager;
 
 public class CanvasScript : MonoBehaviour {
     
@@ -33,16 +34,16 @@ public class CanvasScript : MonoBehaviour {
             TextureSize = new[]{Screen.width, Screen.height};
             Texture2D nT = new Texture2D(TextureSize[0], TextureSize[1]);
             MapTexture = nT;
-            Map.material.SetTexture("_MainTex", MapTexture);
+            Map.material.SetTexture("_MainTex", nT);
         }
         mapLoad = new[]{0, TextureSize[0]*TextureSize[1], 100000};
     }
 
     void MapRender(){
-        float[] offsetedBlock = {(mapLoad[0]%TextureSize[0]) - TextureSize[0]/2f, (mapLoad[0]/TextureSize[0]) - TextureSize[0]/2f};
+        float[] offsetedBlock = {(mapLoad[0]%TextureSize[0]) - TextureSize[0]/2f, (mapLoad[0]/TextureSize[0]) - TextureSize[1]/2f};
         Color biomeColor = Color.blue;
         Vector2 e = Offset[0] + new Vector2(offsetedBlock[0] * BlocksPerPixel, offsetedBlock[1] * BlocksPerPixel);
-        if(WorldManager.getWater(e) >= 0f) biomeColor = WorldManager.biomeColors[(int)WorldManager.getBiome(e).x];
+        if(getWater(e) >= 0f) biomeColor = biomeColors[(int)getBiome(e).x];
         MapTexture.SetPixel(mapLoad[0]%TextureSize[0], mapLoad[0]/TextureSize[0], biomeColor);
         mapLoad[0]++;
     }
@@ -53,7 +54,7 @@ public class CanvasScript : MonoBehaviour {
             MapAnchor.transform.localScale = Vector3.one;
 
             float shiftPower = 25f;
-            if(Input.GetMouseButton(0) && mapEnable){
+            if(Input.GetMouseButton(0) && mapEnable && shiftZoom[0] == BlocksPerPixel){
                 Offset[0] -= new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y")) * BlocksPerPixel * shiftPower;
                 Map.GetComponent<RectTransform>().anchoredPosition += new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y")) * shiftPower;
             } else if (Offset[1] != Offset[0]){

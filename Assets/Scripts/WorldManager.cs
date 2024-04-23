@@ -15,9 +15,9 @@ public class WorldManager : MonoBehaviour {
     static Vector2 perlinOffset;
 
     // Cell info
-    const int MapSize = 100;
+    const int MapSize = 200;
     const int PushDist = 25;
-    readonly int[] ParseSpeed = {25, 1000};
+    readonly int[] ParseSpeed = {100, 1000};
     Cell[,] Loaded;
     Vector2 currPos;
     Vector2 prevPos;
@@ -36,16 +36,15 @@ public class WorldManager : MonoBehaviour {
         public void pushPosPos(Vector2Int newP){ Pos += new Vector2Int(newP.x, newP.y); }
         public Vector2 getPos(){ return new(Pos.x, Pos.y); }
         void setData(){
-            float perlin = getHeight(new(Pos.x, Pos.y));
-            float islandM = getContinent(new(Pos.x, Pos.y));
-            if(perlin < islandM){
+            float checkWater = getWater(new(Pos.x, Pos.y));
+            if(checkWater <= 0f){
                 isWater = true;
-                Height = perlin / islandM;
+                Height = -checkWater;
             } else {
                 isWater = false;
-                Height = (perlin - islandM) / (1f - islandM);
-                biome = (int)getBiome(new(Pos.x, Pos.y));
-                biomeSaturation = Mathf.Sin( getBiome(new(Pos.x, Pos.y)) / Mathf.PI );
+                Height = checkWater;
+                biome = (int)getBiome(new(Pos.x, Pos.y)).x;
+                biomeSaturation = Mathf.Sin( getBiome(new(Pos.x, Pos.y)).y / Mathf.PI );
             }
         }
     };
@@ -59,24 +58,26 @@ public class WorldManager : MonoBehaviour {
 
     // References
     public Transform POV;
+    float POVscroll = 10f;
 
     // test tiles
     public GameObject TestTile;
     GameObject[,] ttt;
     Color[] biomeColors = {
-        new(0.5f, 1f, 0f), 
-        new(1f, 1f, 0.5f), 
-        new(0.5f, 0.5f, 0.5f), 
-        new(1f,1f,1f),
-        new(1f, 0.5f, 1f),
-        new(0f, 0.5f, 0f),
-        new(1f, 0.5f, 0f)
+        new(.75f, .75f, 0.5f), // 0 - Sand
+        new(0.5f, 1f, 0f), // 1 - Plain
+        new(1f, 1f, 0f), // 2 - Farms
+        new(1f, 0.5f, 1f), // 3 - Moor
+        new(0f,0.5f,0f), // 4 - Forest
+        new(0.5f, 0.5f, 0f), // 5 - Tundra
+        new(0.5f, 0.5f, 0.5f), // 6 - Mountain
+        new(1f, 1f, 1f) // 7 - Snow
     };
 
     void Start(){
         if (RandomGeneration) Seed = Random.Range(1, 999999);
         Random.InitState(Seed);
-        perlinOffset = new Vector2(Random.value, Random.value);
+        perlinOffset = new Vector2(Random.value* 999999f, Random.value * 999999f);
         currPos = Vector3.one*9999f;
         beginLoad(Vector3.zero);
 
@@ -93,13 +94,15 @@ public class WorldManager : MonoBehaviour {
         
         POV.transform.position += new Vector3(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical")) * Time.deltaTime * 4f;
         if(Input.GetMouseButton(0)) POV.transform.position -= new Vector3(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y")) * 4f;
+        if(Input.mouseScrollDelta.y != 0f) POVscroll = Mathf.Clamp(POVscroll - Input.mouseScrollDelta.y, 5f, 200f);
+        POV.GetComponent<Camera>().orthographicSize = Mathf.Lerp(POV.GetComponent<Camera>().orthographicSize, POVscroll, Time.deltaTime * 10f);
 
         Stats.text = statsUpdate();
     }
 
     void checkForChunkUpdate(){
         if(loadChunk[0] < loadChunk[1]) {
-            int ps = (int)Mathf.Lerp(ParseSpeed[0], ParseSpeed[1], Vector3.Distance(loadPos, currPos) / MapSize);
+            int ps = (int)Mathf.Lerp(ParseSpeed[0], ParseSpeed[1], (Vector3.Distance(loadPos, currPos) - MapSize/2f) / MapSize);
             for (int ql = Mathf.Clamp(ps, 0, loadChunk[1]-loadChunk[0]); ql > 0; ql--) {
                 Load(loadChunk[0]);
                 loadChunk[0]++;
@@ -147,9 +150,10 @@ public class WorldManager : MonoBehaviour {
         else {
             //Vis.GetComponent<SpriteRenderer>().color = Color.Lerp(new Color(0.5f, 1f, 0f), new Color(0f, 0.25f, 0f), target.Height);
             Vis.GetComponent<SpriteRenderer>().color = biomeColors[target.biome];//Color.Lerp(biomeColors[target.biome], biomeColors[target.biome]/10f, target.biomeSaturation);
+            //Vis.GetComponent<SpriteRenderer>().color = Color.Lerp(Color.white, Color.red, getWater(target.getPos()) *12f);
         }
 
-        Vis.transform.GetChild(0).GetComponent<TextMesh>().text = "x" + target.getPos().x + "\ny" + target.getPos().y + "\nb" + target.biome;// + " / " + target.biomeSaturation;
+        Vis.transform.GetChild(0).GetComponent<TextMesh>().text = "x" + target.getPos().x + "\ny" + target.getPos().y + "\nw" + target.isWater;// + " / " + target.biomeSaturation;
     }
     // Cell operators
 
@@ -166,17 +170,44 @@ public class WorldManager : MonoBehaviour {
     // Stats monitor
 
     // World generation values
-    public static float[] islandMargin = {1f, -1f, 40};
-    public static float islandSize = 4;
-    public static float biomeSize = 40;
+    public static float[] islandMargin = {1f, -1f, 400};
+    public static float islandSize = 10;
+    public static float biomeSize = 160;
     public static float getHeight(Vector2 tilePos){
-        return Mathf.Pow( Mathf.PerlinNoise((tilePos.x * 0.333f + perlinOffset.x) / islandSize, (tilePos.y * 0.333f + perlinOffset.y) / islandSize) , 2f );
+        return Mathf.Pow( erode((tilePos.x * 0.333f + perlinOffset.x) / islandSize, (tilePos.y * 0.333f + perlinOffset.y) / islandSize, 5f) , 2f );
     }
     public static float getContinent(Vector2 tilePos){
-        return Mathf.Clamp( Mathf.Lerp(islandMargin[0], islandMargin[1], Mathf.Pow( Mathf.PerlinNoise((tilePos.x * 0.333f + perlinOffset.x) / islandMargin[2], (tilePos.y * 0.333f + perlinOffset.y) / islandMargin[2]) , 2f )) , 0f, 1f);
+        return Mathf.Clamp( Mathf.Lerp(islandMargin[0], islandMargin[1], Mathf.Pow( erode((tilePos.x * 0.333f + perlinOffset.x) / islandMargin[2], (tilePos.y * 0.333f + perlinOffset.y) / islandMargin[2], 0f) , 2f )) , 0f, 1f);
     }
-    public static float getBiome(Vector2 tilePos){
-        return Mathf.Lerp(0f, 6f, Mathf.PerlinNoise((tilePos.x * 3.333f + perlinOffset.y) / biomeSize, (tilePos.y * 3.333f + perlinOffset.x) / biomeSize) );
+
+    public static int[,] biomeProgression = new int[7, 9]{
+        {0,1,2,3,4,5,6,7,0}, // Normal
+        {0,1,1,2,3,3,2,4,1}, // Grasslands
+        {1,5,7,5,7,7,4,6,2}, // Snow
+        {0,1,2,5,4,4,5,4,3}, // Woodlands
+        {0,0,0,1,0,0,2,6,0}, // Desert
+        {0,5,5,4,5,5,3,5,4}, // Tundra
+        {0,1,3,3,1,3,3,2,2}, // Pure moor
+    };
+    public static Vector2 getBiome(Vector2 tilePos){
+        float sector = erode((tilePos.x*3.333f + perlinOffset.x) / (biomeSize*10f), (tilePos.y*3.333f + perlinOffset.y) / (biomeSize*10f), 15f) * 6.9f;
+        float partition = erode((tilePos.x * 3.333f + perlinOffset.y) / biomeSize, (tilePos.y * 3.333f + perlinOffset.x) / biomeSize, 10f) * Mathf.Clamp(getWater(tilePos, 1)*24f, 0f, 7.9f);
+        //float partition = Mathf.Lerp(1f, Mathf.Clamp(7f, 0f, getWater(tilePos, 1)*14f), erode((tilePos.x * 3.333f + perlinOffset.y) / biomeSize, (tilePos.y * 3.333f + perlinOffset.x) / biomeSize, 1f) % 1f );
+        return new(biomeProgression[(int)sector, (int)partition], partition%1f);
+        //return Mathf.Lerp(1f, Mathf.Clamp(7f, 0f, getWater(tilePos)*14f), erode((tilePos.x * 3.333f + perlinOffset.y) / biomeSize, (tilePos.y * 3.333f + perlinOffset.x) / biomeSize, 1f) % 1f );
+    }
+    public static float getWater(Vector2 Pos, int nega = -1){
+        float perlin = getHeight(new(Pos.x, Pos.y));
+        float islandM = getContinent(new(Pos.x, Pos.y));
+        if(perlin < islandM) return perlin / (islandM*nega);
+        else return (perlin - islandM) / (1f - islandM);
+    }
+
+    public static float erode(float x, float y, float p = 10f){
+        float normal = Mathf.PerlinNoise(x, y);
+        float eroded = Mathf.PerlinNoise(x * p, y * p);
+        float mask = Mathf.PerlinNoise(y / 3f, x / 3f);
+        return Mathf.Lerp(normal, eroded, mask/2f);
     }
     // World generation values
 

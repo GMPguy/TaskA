@@ -16,9 +16,9 @@ public class WorldManager : MonoBehaviour {
     static Vector2 perlinOffset;
 
     // Cell info
-    public static int MapSize = 100;
-    public static int PushDist = 25;
-    readonly int[] ParseSpeed = {100, 1000};
+    public static int MapSize = 50;
+    public static int PushDist = 50;
+    readonly int[] ParseSpeed = {1, 10};
     public static Cell[,] Loaded;
     public static Vector2 currPos;
     Vector2 prevPos;
@@ -100,7 +100,7 @@ public class WorldManager : MonoBehaviour {
         if(loadChunk[0] < loadChunk[1]) {
             int ps = (int)Mathf.Lerp(ParseSpeed[0], ParseSpeed[1], (Vector3.Distance(loadPos, currPos) - MapSize/2f) / MapSize);
             for (int ql = Mathf.Clamp(ps, 0, loadChunk[1]-loadChunk[0]); ql > 0; ql--) {
-                drawingMechanism.load(loadChunk[0]);
+                drawingMechanism.load(loadChunk[0], ql);
                 loadChunk[0]++;
             }
         } else if (loadChunk[0] == loadChunk[1]) {

@@ -16,9 +16,9 @@ public class WorldManager : MonoBehaviour {
     static Vector2 perlinOffset;
 
     // Cell info
-    public static int MapSize = 480;
-    public static int PushDist = 10;
-    public static readonly int[] ParseSpeed = {100, 3000};
+    public static int MapSize = 128;
+    public static int PushDist = 64;
+    public static readonly int[] ParseSpeed = {10, 3000};
     public static Cell[,] Loaded;
     public static Vector2 currPos;
     Vector2 prevPos;
@@ -96,9 +96,12 @@ public class WorldManager : MonoBehaviour {
         Stats.text = statsUpdate();
     }
 
+    float psLerp = 0f;
     void checkForChunkUpdate(){
+        psLerp = (Vector2.Distance(currPos, POV.position) - PushDist) / ((MapSize/2f) - PushDist);
+
         if(loadChunk[0] < loadChunk[1]) {
-            int ps = (int)Mathf.Lerp(ParseSpeed[0], ParseSpeed[1], (Vector3.Distance(loadPos, currPos) - MapSize/2f) / MapSize);
+            int ps = (int)Mathf.Lerp(ParseSpeed[0], ParseSpeed[1], psLerp);
             for (int ql = Mathf.Clamp(ps, 0, loadChunk[1]-loadChunk[0]); ql > 0; ql--) {
                 drawingMechanism.load(loadChunk[0], ql);
                 loadChunk[0]++;
@@ -120,7 +123,7 @@ public class WorldManager : MonoBehaviour {
     public Text Stats;
     string statsUpdate(){
         string result = "FPS: " + (1f/Time.unscaledDeltaTime).ToString();
-        if(loadChunk[0] < loadChunk[1]) result += "\nLoading tiles: " + loadChunk[0] + "/" + loadChunk[1];
+        if(loadChunk[0] < loadChunk[1]) result += "\nLoading tiles: " + loadChunk[0] + "/" + loadChunk[1] + " speed: " + (int)Mathf.Lerp(ParseSpeed[0], ParseSpeed[1], psLerp) + "/" + ParseSpeed[1];
         else result += "\nMap loaded";
         result += "\nLoad instance " + chungID + "\n\n" + "\nLoad offset: " + loadPos + "\nWorld offset: " + currPos + "\nCamera offset: " + POV.transform.position;
         result += "\n\nMap size: " + MapSize + "\nRefresh trigger: " + PushDist + "\nRefresh speed: " + ParseSpeed;

@@ -65,9 +65,6 @@ public class TextureDB : DrawBase {
     void StampColor(Vector2 coor, Texture2D sTex, Color sColor){
         Vector3 corrected = (coor-loadPos + new Vector2(MapSize/2f, MapSize/2f)) * ss;
         sTex.SetPixels32((int)corrected.x, (int)corrected.y, ss, ss, giveColorArray(sColor));
-        /*for (int y = 0; y < ss; y++) for (int x = 0; x < ss; x++) {
-            sTex.SetPixel(x + (int)corrected.x, y + (int)corrected.y, Color.Lerp(sColor, Color.black, (x+y)/(ss*ss)));
-        }*/
     }
 
     Color32[] giveColorArray(Color32 DesiredColor){

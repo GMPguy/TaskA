@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using static getStatic.WorldManager;
 
@@ -47,12 +48,11 @@ public class TextureDB : DrawBase {
             setTile(newCache[x, y]);
         }
 
-        if(lastCall == 1) mapTextures[currMap].Apply();
         if(loadChunk[0] >= loadChunk[1]-1) {
-            print("Last call of iteration " + chungID + " The current displayed map id is " + currMap);
+            mapTextures[currMap].Apply();
             for (int pt = 0; pt < amountOfMaps; pt++) {
-                if(pt == currMap) mapTransforms[currMap].localScale = Vector3.one*MapSize;
-                else mapTransforms[currMap].localScale = Vector3.zero;
+                if(pt == currMap) mapTransforms[pt].localScale = Vector3.one*MapSize;
+                else mapTransforms[pt].localScale = Vector3.zero;
             }
         }
     }
@@ -64,9 +64,16 @@ public class TextureDB : DrawBase {
 
     void StampColor(Vector2 coor, Texture2D sTex, Color sColor){
         Vector3 corrected = (coor-loadPos + new Vector2(MapSize/2f, MapSize/2f)) * ss;
-        for (int y = 0; y < ss; y++) for (int x = 0; x < ss; x++) {
+        sTex.SetPixels32((int)corrected.x, (int)corrected.y, ss, ss, giveColorArray(sColor));
+        /*for (int y = 0; y < ss; y++) for (int x = 0; x < ss; x++) {
             sTex.SetPixel(x + (int)corrected.x, y + (int)corrected.y, Color.Lerp(sColor, Color.black, (x+y)/(ss*ss)));
-        }
+        }*/
+    }
+
+    Color32[] giveColorArray(Color32 DesiredColor){
+        Color32[] colorArray = new Color32[ss*ss];
+        for(int ca = 0; ca < ss*ss; ca++) colorArray[ca] = DesiredColor;
+        return colorArray;
     }
 
 }

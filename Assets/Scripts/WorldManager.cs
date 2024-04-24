@@ -16,9 +16,9 @@ public class WorldManager : MonoBehaviour {
     static Vector2 perlinOffset;
 
     // Cell info
-    public static int MapSize = 50;
-    public static int PushDist = 50;
-    readonly int[] ParseSpeed = {1, 10};
+    public static int MapSize = 200;
+    public static int PushDist = 10;
+    public static readonly int[] ParseSpeed = {200, 2000};
     public static Cell[,] Loaded;
     public static Vector2 currPos;
     Vector2 prevPos;

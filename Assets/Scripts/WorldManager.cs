@@ -16,8 +16,8 @@ public class WorldManager : MonoBehaviour {
     static Vector2 perlinOffset;
 
     // Cell info
-    public static int MapSize = 128;
-    public static int PushDist = 64;
+    public static int MapSize = 320;
+    public static int PushDist = 1;
     public static readonly int[] ParseSpeed = {10, 3000};
     public static Cell[,] Loaded;
     public static Vector2 currPos;
@@ -62,6 +62,25 @@ public class WorldManager : MonoBehaviour {
     public Transform POV;
     float POVscroll = 10f;
 
+    // Map tiles sprites
+    public Texture2D[] tileSprites;
+    static pixelMap[] tileSpritesRef;
+
+    struct pixelMap{
+        public Color32[] theMap;
+        public pixelMap(Color32[] setMap){ theMap = setMap; }
+    };
+
+    void setupTileSprites(){
+        tileSpritesRef = new pixelMap[tileSprites.Length];
+        for (int gt = 0; gt < tileSprites.Length; gt++){
+            tileSpritesRef[gt] = new (tileSprites[gt].GetPixels32());
+        }
+    }
+    public static Color32[] getTileMap (int mapID) {
+        return tileSpritesRef[mapID].theMap;
+    }
+
     // test tiles
     public GameObject TestTile;
     GameObject[,] ttt;
@@ -77,6 +96,7 @@ public class WorldManager : MonoBehaviour {
     };
 
     void Start(){
+        setupTileSprites();
         if (RandomGeneration) Seed = Random.Range(1, 999999);
         Random.InitState(Seed);
         perlinOffset = new Vector2(Random.value* 999999f, Random.value * 999999f);

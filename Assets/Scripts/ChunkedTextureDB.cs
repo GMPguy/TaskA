@@ -13,10 +13,9 @@ public class ChunkedTextureDB : DrawBase {
     public int amountOfMaps = 2;
     int currMap = 0;
     public int ss = 1;
-    int[,] pushColored;
+
     public override void initializeSystem(){
-        PushDist /= chunkSize;
-        pushColored = new int[MapSize/chunkSize, MapSize/chunkSize];
+        PushDist *= chunkSize;
         GameObject FirstChunk = this.transform.GetChild(0).gameObject;
         int chunksPerWidth = MapSize/chunkSize;
         chunkTransforms = new Transform[chunksPerWidth, chunksPerWidth];
@@ -27,6 +26,7 @@ public class ChunkedTextureDB : DrawBase {
             chunkTransforms[smY, smX].localScale = Vector3.one*chunkSize;
             Texture2D nt = new Texture2D(chunkSize*ss, chunkSize*ss);
             chunkTransforms[smY, smX].GetComponent<MeshRenderer>().material.mainTexture = nt;
+            chunkTransforms[smY, smX].GetComponent<MeshRenderer>().material.mainTexture.filterMode = FilterMode.Point;
             chunkTextures[smY, smX] = nt;
         }
         Destroy(FirstChunk);
@@ -66,13 +66,12 @@ public class ChunkedTextureDB : DrawBase {
             newCache[x, y] = Loaded[x + (int)diff.x, y + (int)diff.y];
         } else { 
             newCache[x, y] = new(new(MapSize/-2 + x + (int)loadPos.x, MapSize/-2 + y + (int)loadPos.y));
-            pushColored[x/chunkSize, y/chunkSize] = 1;
         }
 
         if(x%chunkSize == chunkMargin[0] && y%chunkSize == chunkMargin[1]){
             setChunk(
                 blur, // xy for bl - xy for ur
-                new int[] {x/chunkSize, y/chunkSize}
+                new []{x/chunkSize, y/chunkSize}
             );
         }
 
@@ -82,7 +81,7 @@ public class ChunkedTextureDB : DrawBase {
     void setChunk(int[] cc, int[] gc){
         Cell[] ca = {newCache[cc[0], cc[1]], newCache[cc[2], cc[3]]};
         chunkTransforms[gc[0], gc[1]].position = Vector3.Lerp(ca[0].getPos(), ca[1].getPos(), 0.5f);
-        chunkTransforms[gc[0], gc[1]].localScale = Vector3.one * chunkSize * 0.98f;
+        chunkTransforms[gc[0], gc[1]].localScale = Vector3.one * chunkSize;
         for (int y = cc[1]; y <= cc[3]; y++) for (int x = cc[0]; x <= cc[2]; x++) {
             setTile(newCache[x, y], chunkTransforms[gc[0], gc[1]].position, chunkTextures[gc[0], gc[1]]);
         }
@@ -90,12 +89,17 @@ public class ChunkedTextureDB : DrawBase {
     }
 
     void setTile(Cell target, Vector3 tChunk, Texture2D tTexture){
-        if(!target.isWater) StampColor( target.getPos(), tChunk, tTexture, biomeColors[target.biome]);
-        else StampColor(target.getPos(), tChunk, tTexture, Color.Lerp(Color.blue, Color.black, target.Height));
+        if(!target.isWater) StampImage( target.getPos(), tChunk, tTexture, getTileMap(target.biome));
+        else StampColor(target.getPos(), tChunk, tTexture, Color.Lerp(new(0f, 0f, 0f, 0f), new(0f,0.1f,0.2f,1f), target.Height));
+    }
+
+    void StampImage(Vector2 coor, Vector2 chunkPos, Texture2D sTex, Color32[] sImg){
+        Vector3 corrected = ((coor-chunkPos + new Vector2(chunkSize/2f, chunkSize/2f)) * ss) - (Vector2.one*ss/2f);
+        sTex.SetPixels32((int)corrected.x, (int)corrected.y, ss, ss, sImg);
     }
 
     void StampColor(Vector2 coor, Vector2 chunkPos, Texture2D sTex, Color sColor){
-        Vector3 corrected = ((coor-chunkPos + new Vector2(chunkSize/2f, chunkSize/2f)) * ss) - ((Vector2.one*ss)/2f);
+        Vector3 corrected = ((coor-chunkPos + new Vector2(chunkSize/2f, chunkSize/2f)) * ss) - (Vector2.one*ss/2f);
         sTex.SetPixels32((int)corrected.x, (int)corrected.y, ss, ss, giveColorArray(sColor));
     }
 

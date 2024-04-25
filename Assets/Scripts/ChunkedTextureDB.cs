@@ -12,7 +12,7 @@ public class ChunkedTextureDB : DrawBase {
     public int chunkSize = 32;
     public int amountOfMaps = 2;
     int currMap = 0;
-    public int ss = 1;
+    public int ss = 32;
 
     public override void initializeSystem(){
         PushDist *= chunkSize;
@@ -89,7 +89,7 @@ public class ChunkedTextureDB : DrawBase {
     }
 
     void setTile(Cell target, Vector3 tChunk, Texture2D tTexture){
-        if(!target.isWater) StampImage( target.getPos(), tChunk, tTexture, getTileMap(target.biome));
+        if(!target.isWater) StampImage( target.getPos(), tChunk, tTexture, getTM(target.biome, target.Height));
         else StampColor(target.getPos(), tChunk, tTexture, Color.Lerp(new(0f, 0f, 0f, 0f), new(0f,0.1f,0.2f,1f), target.Height));
     }
 

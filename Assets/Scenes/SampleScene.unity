@@ -523,19 +523,93 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Seed: 443041
-  RandomGeneration: 0
+  RandomGeneration: 1
   drawingMechanism: {fileID: 1857958394}
   POV: {fileID: 519420032}
-  tileSprites:
-  - {fileID: 2800000, guid: e8fa531f18727ab4eaf5457e46932c13, type: 3}
-  - {fileID: 2800000, guid: 34785e29c687f9146996d11b7db9481d, type: 3}
-  - {fileID: 2800000, guid: 704123a875bfc80468ed2555c2dec801, type: 3}
-  - {fileID: 2800000, guid: bd4e742a47343654aa72986ad42cf7cb, type: 3}
-  - {fileID: 2800000, guid: 6eda764c317984945905970163d52de9, type: 3}
-  - {fileID: 0}
-  - {fileID: 2800000, guid: 56c548077d22a944f91dd33be7a14769, type: 3}
-  - {fileID: 2800000, guid: 6c08b52a9925fec45bccc0f3a6ed573c, type: 3}
-  TestTile: {fileID: 1301830426865002716, guid: dca7a9a1b60a9f045acf20e22c7e82a1, type: 3}
+  tilesToLoad:
+  - tileTextures:
+    - {fileID: 2800000, guid: 557ffd3d2aac1ea47ad4046ec8db39d2, type: 3}
+    - {fileID: 2800000, guid: bcef4c3d76b36504aabcd2e74bdf9448, type: 3}
+    - {fileID: 2800000, guid: bd3efe67364bbe04e95000831d7e15b7, type: 3}
+    - {fileID: 2800000, guid: 2397bcf54f77fa84e946ceaf027dd803, type: 3}
+    - {fileID: 2800000, guid: 7f51572fc769b074aa9eeabb6dfc5ba6, type: 3}
+    - {fileID: 2800000, guid: 3c80f47b3f83177479c413f290db1ec5, type: 3}
+    copyTextures: 
+  - tileTextures:
+    - {fileID: 2800000, guid: 76b1866d418dca647a5c08bde5175d1e, type: 3}
+    - {fileID: 2800000, guid: 950bf148915e4944f8d2d3439e18dad2, type: 3}
+    - {fileID: 2800000, guid: 273bf84e64539a94696792bccc67956a, type: 3}
+    - {fileID: 2800000, guid: 6ddf773eec6109c4db7be7395ff9aae3, type: 3}
+    - {fileID: 2800000, guid: c458d24a1acfeac42932ea7603f97726, type: 3}
+    copyTextures: 
+  - tileTextures:
+    - {fileID: 2800000, guid: 21dba9be97579bc4b8d472446deca8c8, type: 3}
+    - {fileID: 2800000, guid: ccbddb94b99a6a2428e10d14ac4f716c, type: 3}
+    - {fileID: 2800000, guid: 24670d439582cd94bb81a21b071b75ec, type: 3}
+    - {fileID: 2800000, guid: c1a180a0dd17c9e45b5f176e5442181a, type: 3}
+    - {fileID: 2800000, guid: 535e8bb00fd72c44688fad588f7459aa, type: 3}
+    copyTextures: 
+  - tileTextures:
+    - {fileID: 2800000, guid: ac231cc54cda1514ba2a9a93ddf01b2f, type: 3}
+    - {fileID: 2800000, guid: 50d4fc9990f165d4e8d85187ae022928, type: 3}
+    - {fileID: 2800000, guid: a63f00926928e364ead0172822d0b901, type: 3}
+    - {fileID: 2800000, guid: a5c7fba2841873e4dbb6ba6386f27139, type: 3}
+    - {fileID: 2800000, guid: 25034b490486a294d866d22f4947d572, type: 3}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 2800000, guid: ba92b773f4e37cb4ba6bd4f4f8da5ad3, type: 3}
+    - {fileID: 2800000, guid: 7d732827883ad8c4497fb562e541beef, type: 3}
+    - {fileID: 2800000, guid: e66bf94052176b1419d613cae5e30626, type: 3}
+    - {fileID: 2800000, guid: de64ee0224db6fb4c9a93392ffc24f14, type: 3}
+    - {fileID: 2800000, guid: 1335859d6f38fe64a9f1227430b2fe22, type: 3}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 2800000, guid: 72c0e8afc60953e46bc134611e879cd9, type: 3}
+    - {fileID: 2800000, guid: b0ddde7fad25bdd479fc19f629b951c1, type: 3}
+    - {fileID: 2800000, guid: b592a5fbfe7fa3d4db781c4701903f93, type: 3}
+    - {fileID: 2800000, guid: bd7b57b9565d0774d8893f19b03fab57, type: 3}
+    - {fileID: 2800000, guid: a5b398dd28e09454aaf790427d84f43d, type: 3}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    copyTextures: 00000000010000000200000003000000040000000a0000000b0000000c0000000d0000000e0000001400000015000000160000001700000018000000
+  - tileTextures:
+    - {fileID: 2800000, guid: 8e31d19a401e63149993b293e336dda1, type: 3}
+    - {fileID: 2800000, guid: 2c65fac06411273488938e9dadaea4b3, type: 3}
+    - {fileID: 2800000, guid: befddf02d38ea58469f10918b0bcffd7, type: 3}
+    - {fileID: 2800000, guid: 106ef3bee89ddaa439f952cba1a519f6, type: 3}
+    - {fileID: 2800000, guid: 8624093d251320645b1a9164618da0be, type: 3}
+    - {fileID: 2800000, guid: 30712696fa63bde458856c51bac11749, type: 3}
+    - {fileID: 2800000, guid: a561f28adb4cebf4f8fe269e1f99a04b, type: 3}
+    - {fileID: 2800000, guid: 0fdf224980f6ab9488770a0ba5e5fd5e, type: 3}
+    copyTextures: 
+  - tileTextures:
+    - {fileID: 2800000, guid: 6c8a79f5d7845524885668cb82b9c91c, type: 3}
+    - {fileID: 2800000, guid: 12483c5769936ea49a7c846fb048aafc, type: 3}
+    - {fileID: 2800000, guid: 0aa49fccdd593bd4093beeccf613ca0f, type: 3}
+    - {fileID: 2800000, guid: 9316fdf116d61c54c8e1112e067859e8, type: 3}
+    - {fileID: 2800000, guid: 3310f0f10696baf43aabb8b49ce5193c, type: 3}
+    copyTextures: 
+  - tileTextures:
+    - {fileID: 2800000, guid: cc9407e1472c6cd429d6764a23c6144b, type: 3}
+    - {fileID: 2800000, guid: 7bbe1a472b7f63a43bfbffb3f558729b, type: 3}
+    - {fileID: 2800000, guid: 21c75a0b7bb2760498dfa1d98dd23599, type: 3}
+    - {fileID: 2800000, guid: 44e59bcfe3c7985478fe1eba02477312, type: 3}
+    - {fileID: 2800000, guid: 51d787ea4c22f0549bcd1ee1718f7f3b, type: 3}
+    - {fileID: 2800000, guid: 6d78c5961c552ce4d960eadf49db6939, type: 3}
+    - {fileID: 2800000, guid: 729808c7e264e2445b10c9ef23172b45, type: 3}
+    copyTextures: 
+  - tileTextures:
+    - {fileID: 2800000, guid: 6c08b52a9925fec45bccc0f3a6ed573c, type: 3}
+    copyTextures: 
   Stats: {fileID: 4270176}
 --- !u!4 &417880640
 Transform:
@@ -1219,7 +1293,7 @@ MonoBehaviour:
   PaintBrush: {fileID: 0}
   chunkSize: 32
   amountOfMaps: 2
-  ss: 16
+  ss: 32
 --- !u!1 &1995550464
 GameObject:
   m_ObjectHideFlags: 0

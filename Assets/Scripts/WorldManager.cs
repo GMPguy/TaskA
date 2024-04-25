@@ -63,27 +63,53 @@ public class WorldManager : MonoBehaviour {
     float POVscroll = 10f;
 
     // Map tiles sprites
-    public Texture2D[] tileSprites;
-    static pixelMap[] tileSpritesRef;
+    public tempPB[] tilesToLoad;
+    public static pixelMap[] pixelMaps;
 
-    struct pixelMap{
-        public Color32[] theMap;
-        public pixelMap(Color32[] setMap){ theMap = setMap; }
-    };
+    [System.Serializable]
+    public struct tempPB{
+        public Texture2D[] tileTextures;
+        public int[] copyTextures;
+    }
 
-    void setupTileSprites(){
-        tileSpritesRef = new pixelMap[tileSprites.Length];
-        for (int gt = 0; gt < tileSprites.Length; gt++){
-            tileSpritesRef[gt] = new (tileSprites[gt].GetPixels32());
+    public struct pixelMap{
+        public pixelList[] acquiredTiles;
+        public int[] properTiles;
+
+        public struct pixelList{
+            public Color32[] Data;
+            public pixelList(Color32[] setData){ Data = setData;}
+        }
+
+        public void setUp(WorldManager.tempPB template){
+            acquiredTiles = new pixelList[template.tileTextures.Length];
+            properTiles = new int[template.tileTextures.Length];
+            int checkCopy = 0;
+            for (int gt = 0; gt < template.tileTextures.Length; gt++){
+                if(template.tileTextures[gt] != null) {
+                    acquiredTiles[gt] = new (template.tileTextures[gt].GetPixels32());
+                    properTiles[gt] = gt;
+                } else {
+                    acquiredTiles[gt] = new (template.tileTextures[template.copyTextures[checkCopy]].GetPixels32());
+                    properTiles[gt] = template.copyTextures[checkCopy];
+                    checkCopy++;
+                }
+            }
         }
     }
-    public static Color32[] getTileMap (int mapID) {
-        return tileSpritesRef[mapID].theMap;
+
+    public static Color32[] getTM(int biomeID, int mapID = 0){
+        pixelMap got = pixelMaps[biomeID];
+        return got.acquiredTiles[got.properTiles[mapID]].Data;
     }
 
+    public static Color32[] getTM(int biomeID, float mapLerp){
+        pixelMap got = pixelMaps[biomeID];
+        return got.acquiredTiles[got.properTiles[(int)(mapLerp * got.acquiredTiles.Length)]].Data;
+    }
+    // Map tiles sprites
+
     // test tiles
-    public GameObject TestTile;
-    GameObject[,] ttt;
     public static Color[] biomeColors = {
         new(.75f, .75f, 0.5f), // 0 - Sand
         new(0.5f, 1f, 0f), // 1 - Plain
@@ -96,7 +122,12 @@ public class WorldManager : MonoBehaviour {
     };
 
     void Start(){
-        setupTileSprites();
+        pixelMaps = new pixelMap[tilesToLoad.Length];
+        for(int setup = 0; setup < pixelMaps.Length; setup++) {
+            print("SetUp");
+            pixelMaps[setup].setUp(tilesToLoad[setup]);
+        }
+        
         if (RandomGeneration) Seed = Random.Range(1, 999999);
         Random.InitState(Seed);
         perlinOffset = new Vector2(Random.value* 999999f, Random.value * 999999f);

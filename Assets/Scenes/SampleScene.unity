@@ -606,7 +606,12 @@ MonoBehaviour:
   drawingMechanism: {fileID: 1857958394}
   POV: {fileID: 519420032}
   tilesToLoad:
-  - tileTextures:
+  - tileID: 0
+    tileName: Beach sand
+    tileColor:
+      serializedVersion: 2
+      rgba: 4283923091
+    tileTextures:
     - {fileID: 2800000, guid: 557ffd3d2aac1ea47ad4046ec8db39d2, type: 3}
     - {fileID: 2800000, guid: bcef4c3d76b36504aabcd2e74bdf9448, type: 3}
     - {fileID: 2800000, guid: bd3efe67364bbe04e95000831d7e15b7, type: 3}
@@ -614,21 +619,36 @@ MonoBehaviour:
     - {fileID: 2800000, guid: 7f51572fc769b074aa9eeabb6dfc5ba6, type: 3}
     - {fileID: 2800000, guid: 3c80f47b3f83177479c413f290db1ec5, type: 3}
     copyTextures: 
-  - tileTextures:
+  - tileID: 1
+    tileName: Plains
+    tileColor:
+      serializedVersion: 2
+      rgba: 4282295929
+    tileTextures:
     - {fileID: 2800000, guid: 76b1866d418dca647a5c08bde5175d1e, type: 3}
     - {fileID: 2800000, guid: 950bf148915e4944f8d2d3439e18dad2, type: 3}
     - {fileID: 2800000, guid: 273bf84e64539a94696792bccc67956a, type: 3}
     - {fileID: 2800000, guid: 6ddf773eec6109c4db7be7395ff9aae3, type: 3}
     - {fileID: 2800000, guid: c458d24a1acfeac42932ea7603f97726, type: 3}
     copyTextures: 
-  - tileTextures:
+  - tileID: 2
+    tileName: Farmlands
+    tileColor:
+      serializedVersion: 2
+      rgba: 4280988847
+    tileTextures:
     - {fileID: 2800000, guid: 21dba9be97579bc4b8d472446deca8c8, type: 3}
     - {fileID: 2800000, guid: ccbddb94b99a6a2428e10d14ac4f716c, type: 3}
     - {fileID: 2800000, guid: 24670d439582cd94bb81a21b071b75ec, type: 3}
     - {fileID: 2800000, guid: c1a180a0dd17c9e45b5f176e5442181a, type: 3}
     - {fileID: 2800000, guid: 535e8bb00fd72c44688fad588f7459aa, type: 3}
     copyTextures: 
-  - tileTextures:
+  - tileID: 3
+    tileName: Moor
+    tileColor:
+      serializedVersion: 2
+      rgba: 4281467075
+    tileTextures:
     - {fileID: 2800000, guid: ac231cc54cda1514ba2a9a93ddf01b2f, type: 3}
     - {fileID: 2800000, guid: 50d4fc9990f165d4e8d85187ae022928, type: 3}
     - {fileID: 2800000, guid: a63f00926928e364ead0172822d0b901, type: 3}
@@ -660,7 +680,12 @@ MonoBehaviour:
     - {fileID: 0}
     - {fileID: 0}
     copyTextures: 00000000010000000200000003000000040000000a0000000b0000000c0000000d0000000e0000001400000015000000160000001700000018000000
-  - tileTextures:
+  - tileID: 4
+    tileName: Forest
+    tileColor:
+      serializedVersion: 2
+      rgba: 4279594752
+    tileTextures:
     - {fileID: 2800000, guid: 8e31d19a401e63149993b293e336dda1, type: 3}
     - {fileID: 2800000, guid: 2c65fac06411273488938e9dadaea4b3, type: 3}
     - {fileID: 2800000, guid: befddf02d38ea58469f10918b0bcffd7, type: 3}
@@ -670,14 +695,24 @@ MonoBehaviour:
     - {fileID: 2800000, guid: a561f28adb4cebf4f8fe269e1f99a04b, type: 3}
     - {fileID: 2800000, guid: 0fdf224980f6ab9488770a0ba5e5fd5e, type: 3}
     copyTextures: 
-  - tileTextures:
+  - tileID: 5
+    tileName: Tundra
+    tileColor:
+      serializedVersion: 2
+      rgba: 4281818749
+    tileTextures:
     - {fileID: 2800000, guid: 6c8a79f5d7845524885668cb82b9c91c, type: 3}
     - {fileID: 2800000, guid: 12483c5769936ea49a7c846fb048aafc, type: 3}
     - {fileID: 2800000, guid: 0aa49fccdd593bd4093beeccf613ca0f, type: 3}
     - {fileID: 2800000, guid: 9316fdf116d61c54c8e1112e067859e8, type: 3}
     - {fileID: 2800000, guid: 3310f0f10696baf43aabb8b49ce5193c, type: 3}
     copyTextures: 
-  - tileTextures:
+  - tileID: 6
+    tileName: Mountains
+    tileColor:
+      serializedVersion: 2
+      rgba: 4285953654
+    tileTextures:
     - {fileID: 2800000, guid: cc9407e1472c6cd429d6764a23c6144b, type: 3}
     - {fileID: 2800000, guid: 7bbe1a472b7f63a43bfbffb3f558729b, type: 3}
     - {fileID: 2800000, guid: 21c75a0b7bb2760498dfa1d98dd23599, type: 3}
@@ -686,10 +721,37 @@ MonoBehaviour:
     - {fileID: 2800000, guid: 6d78c5961c552ce4d960eadf49db6939, type: 3}
     - {fileID: 2800000, guid: 729808c7e264e2445b10c9ef23172b45, type: 3}
     copyTextures: 
-  - tileTextures:
+  - tileID: 7
+    tileName: Snow
+    tileColor:
+      serializedVersion: 2
+      rgba: 4294967295
+    tileTextures:
     - {fileID: 2800000, guid: 6c08b52a9925fec45bccc0f3a6ed573c, type: 3}
     copyTextures: 
   Stats: {fileID: 4270176}
+  biomesToLoad:
+  - biomeID: 0
+    biomeName: Snow
+    availableGroundTiles: 0100000005000000070000000500000007000000040000000600000007000000
+  - biomeID: 0
+    biomeName: Mountain
+    availableGroundTiles: 0100000005000000070000000500000007000000050000000600000007000000
+  - biomeID: 0
+    biomeName: Tundra
+    availableGroundTiles: 01000000030000000400000005000000
+  - biomeID: 0
+    biomeName: Grasslands
+    availableGroundTiles: 00000000010000000200000003000000
+  - biomeID: 0
+    biomeName: Normal
+    availableGroundTiles: 0000000001000000020000000300000004000000050000000600000007000000
+  - biomeID: 0
+    biomeName: Woodlands
+    availableGroundTiles: 0000000001000000020000000500000004000000040000000500000004000000
+  - biomeID: 0
+    biomeName: Desert
+    availableGroundTiles: 0000000001000000
 --- !u!4 &417880640
 Transform:
   m_ObjectHideFlags: 0

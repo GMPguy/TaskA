@@ -46,7 +46,7 @@ public class TestDB : DrawBase {
         if(target.isWater) Vis.GetComponent<SpriteRenderer>().color = Color.Lerp(Color.black, Color.blue, target.Height);
         else {
             //Vis.GetComponent<SpriteRenderer>().color = Color.Lerp(new Color(0.5f, 1f, 0f), new Color(0f, 0.25f, 0f), target.Height);
-            Vis.GetComponent<SpriteRenderer>().color = biomeColors[target.biome];//Color.Lerp(biomeColors[target.biome], biomeColors[target.biome]/10f, target.biomeSaturation);
+            //Vis.GetComponent<SpriteRenderer>().color = biomeColors[target.biome];//Color.Lerp(biomeColors[target.biome], biomeColors[target.biome]/10f, target.biomeSaturation);
             //Vis.GetComponent<SpriteRenderer>().color = Color.Lerp(Color.white, Color.red, getWater(target.getPos()) *12f);
             //Vis.GetComponent<SpriteRenderer>().color = Color.Lerp(Color.white, Color.black, riverBias(target.getPos()));
         }

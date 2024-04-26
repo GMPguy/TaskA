@@ -51,9 +51,8 @@ public class CanvasScript : MonoBehaviour {
         float[] offsetedBlock = {(mapLoad[0]%TextureSize[0]) - TextureSize[0]/2f, (mapLoad[0]/TextureSize[0]) - TextureSize[1]/2f};
         Color biomeColor = Color.blue;
         Vector2 e = Offset[0] + new Vector2(offsetedBlock[0] * BlocksPerPixel, offsetedBlock[1] * BlocksPerPixel);
-        if(getWater(e) >= 0f) biomeColor = biomeColors[(int)getBiome(e).x];
+        if(getWater(e) > 0f) biomeColor = loadedTiles[(int)getBiome(e).x].tileColor;
         MapTexture.SetPixel(mapLoad[0]%TextureSize[0], mapLoad[0]/TextureSize[0], biomeColor);
-        //MapTexture.SetPixel(mapLoad[0]%TextureSize[0], mapLoad[0]/TextureSize[0], Color32.Lerp(Color.black, Color.white, getWater(e) ));
         mapLoad[0]++;
     }
 

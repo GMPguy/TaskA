@@ -28,7 +28,8 @@ public class WorldManager : MonoBehaviour {
         Vector2Int Pos;
         public bool isWater;
         public float Height;
-        public int biome;
+        //public int biome;
+        public tileData ground;
         public float biomeSaturation;
         public Cell(Vector2Int sPos){
             Pos = sPos;
@@ -45,7 +46,7 @@ public class WorldManager : MonoBehaviour {
             } else {
                 isWater = false;
                 Height = checkWater;
-                biome = (int)getBiome(new(Pos.x, Pos.y)).x;
+                ground = loadedTiles[(int)getBiome(new(Pos.x, Pos.y)).x];
                 biomeSaturation = getBiome(new(Pos.x, Pos.y)).y;
             }
         }
@@ -64,13 +65,18 @@ public class WorldManager : MonoBehaviour {
     float POVscroll = 10f;
 
     // Map tiles sprites
-    public tempPB[] tilesToLoad;
-    public static pixelMap[] pixelMaps;
+    public tileData[] tilesToLoad;
+    public static tileData[] loadedTiles;
+    //public static pixelMap[] pixelMaps;
 
     [System.Serializable]
-    public struct tempPB{
+    public class tileData{
+        public int tileID, saturationMethod;
+        public string tileName;
+        public Color32 tileColor;
         public Texture2D[] tileTextures;
         public int[] copyTextures;
+        public pixelMap acquiredTiles;
     }
 
     public struct pixelMap{
@@ -82,7 +88,7 @@ public class WorldManager : MonoBehaviour {
             public pixelList(Color32[] setData){ Data = setData;}
         }
 
-        public void setUp(WorldManager.tempPB template){
+        public void setUp(tileData template){
             acquiredTiles = new pixelList[template.tileTextures.Length];
             properTiles = new int[template.tileTextures.Length];
             int checkCopy = 0;
@@ -100,18 +106,18 @@ public class WorldManager : MonoBehaviour {
     }
 
     public static Color32[] getTM(int biomeID, int mapID = 0){
-        pixelMap got = pixelMaps[biomeID];
-        return got.acquiredTiles[got.properTiles[mapID]].Data;
+        pixelMap got = loadedTiles[biomeID].acquiredTiles;
+        return got.acquiredTiles[mapID].Data;
     }
 
     public static Color32[] getTM(int biomeID, float mapLerp){
-        pixelMap got = pixelMaps[biomeID];
+        pixelMap got = loadedTiles[biomeID].acquiredTiles;
         return got.acquiredTiles[got.properTiles[(int)(mapLerp * got.acquiredTiles.Length)]].Data;
     }
     // Map tiles sprites
 
     // test tiles
-    public static Color[] biomeColors = {
+    /*public static Color[] biomeColors = {
         new(.75f, .75f, 0.5f), // 0 - Sand
         new(0.5f, 1f, 0f), // 1 - Plain
         new(1f, 1f, 0f), // 2 - Farms
@@ -120,13 +126,18 @@ public class WorldManager : MonoBehaviour {
         new(0.5f, 0.5f, 0f), // 5 - Tundra
         new(0.5f, 0.5f, 0.5f), // 6 - Mountain
         new(1f, 1f, 1f) // 7 - Snow
-    };
+    };*/
 
     void Start(){
-        pixelMaps = new pixelMap[tilesToLoad.Length];
-        for(int setup = 0; setup < pixelMaps.Length; setup++) {
-            pixelMaps[setup].setUp(tilesToLoad[setup]);
-        }
+
+        loadedTiles = new tileData[tilesToLoad.Length];
+        tilesToLoad.CopyTo(loadedTiles, 0);
+        for(int setup = 0; setup < loadedTiles.Length; setup++) loadedTiles[setup].acquiredTiles.setUp(loadedTiles[setup]);
+        loadedBiomes = new biomeData[biomesToLoad.Length];
+        biomesToLoad.CopyTo(loadedBiomes, 0);
+
+        tilesToLoad = new tileData[0];
+        biomesToLoad = new biomeData[0];
         
         if (RandomGeneration) Seed = Random.Range(1, 999999);
         Random.InitState(Seed);
@@ -201,25 +212,32 @@ public class WorldManager : MonoBehaviour {
         //return Mathf.Clamp( Mathf.Lerp(islandMargin[0], islandMargin[1], Mathf.Pow( Mathf.PerlinNoise((tilePos.x * 0.333f + perlinOffset.x) / islandMargin[2], (tilePos.y * 0.333f + perlinOffset.y) / islandMargin[2]) , 2f )) , 0f, 1f);
     }
 
-    public static int[,] biomeProgression = new int[7, 9]{
-        {0,1,2,3,4,5,6,7,0}, // Normal
-        {0,1,1,2,3,3,2,4,1}, // Grasslands
-        {1,5,7,5,7,7,4,6,2}, // Snow
-        {0,1,2,5,4,4,5,4,3}, // Woodlands
-        {0,0,0,1,0,0,2,6,0}, // Desert
-        {0,5,5,4,5,5,3,5,4}, // Tundra
-        {0,1,3,3,1,3,3,2,2}, // Pure moor
-    };
-    public static Vector2 getBiome(Vector2 tilePos){
+    [System.Serializable]
+    public class biomeData{
+        public int biomeID;
+        public string biomeName;
+        public int[] availableGroundTiles;
+    }
+
+    public biomeData[] biomesToLoad;
+    public static biomeData[] loadedBiomes;
+
+    public static Vector3 getBiome(Vector2 tilePos){
         float[] errosionFactor = {
             erode((tilePos.x + perlinOffset.x) / (biomeSize*10f), (tilePos.y + perlinOffset.y) / (biomeSize*10f), 15f),
             erode((tilePos.x + perlinOffset.y) / biomeSize, (tilePos.y + perlinOffset.x) / biomeSize, 15f)};
-        float sector = erode((tilePos.x*3.333f + perlinOffset.x) / (biomeSize*10f), (tilePos.y*3.333f + perlinOffset.y) / (biomeSize*10f), 15f) * 6.9f;
-        float partition = erode((tilePos.x * 3.333f + perlinOffset.y) / biomeSize, (tilePos.y * 3.333f + perlinOffset.x) / biomeSize, 10f) * Mathf.Clamp(getWater(tilePos, 1)*24f, 0f, 7.9f);
+        int sector = (int)(errosionFactor[0] * loadedBiomes.Length-.1f);
+        biomeData bd = loadedBiomes[sector];
+        int aot =  bd.availableGroundTiles.Length;
+        float partition = 0;
         try {
-            return new(biomeProgression[(int)sector, (int)partition], partition%1f);
+            tileData refTile = loadedTiles[bd.availableGroundTiles[(int)partition]];
+            switch(refTile.saturationMethod){
+                default: partition = errosionFactor[1] * Mathf.Clamp(getWater(tilePos, 1)*aot*2, 0f, aot-1); break;
+            }
+            return new Vector3(bd.availableGroundTiles[(int)partition], partition%1f, sector);
         } catch (Exception e) {
-            Debug.LogError("Biome progression breached " + sector + "/6 (errosion " + errosionFactor[0] + ") - " + partition + "/8" + "(errosion " + errosionFactor[1] + ")\n" + e);
+            Debug.LogError("Biome progression breached " + sector + " (errosion " + errosionFactor[0] + ") - " + partition + " (errosion " + errosionFactor[1] + ")\n" + e);
             return Vector2.zero;
         }
         //return Mathf.Lerp(1f, Mathf.Clamp(7f, 0f, getWater(tilePos)*14f), erode((tilePos.x * 3.333f + perlinOffset.y) / biomeSize, (tilePos.y * 3.333f + perlinOffset.x) / biomeSize, 1f) % 1f );

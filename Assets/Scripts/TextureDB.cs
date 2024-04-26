@@ -58,8 +58,8 @@ public class TextureDB : DrawBase {
     }
 
     void setTile(Cell target){
-        if(!target.isWater) StampColor(target.getPos(), mapTextures[currMap], biomeColors[target.biome]);
-        else StampColor(target.getPos(), mapTextures[currMap], Color.Lerp(Color.blue, Color.black, target.Height));
+        //if(!target.isWater) StampColor(target.getPos(), mapTextures[currMap], biomeColors[target.biome]);
+        //else StampColor(target.getPos(), mapTextures[currMap], Color.Lerp(Color.blue, Color.black, target.Height));
     }
 
     void StampColor(Vector2 coor, Texture2D sTex, Color sColor){

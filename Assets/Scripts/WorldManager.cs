@@ -18,8 +18,8 @@ public class WorldManager : MonoBehaviour {
 
     // Cell info
     public static int MapSize = 320;
-    public static int PushDist = 1;
-    public static readonly int[] ParseSpeed = {10, 1000};
+    public static int PushDist = 5;
+    public static readonly int[] ParseSpeed = {100, 1000};
     public static Cell[,] Loaded;
     public static Vector2 currPos;
     Vector2 prevPos;
@@ -125,7 +125,6 @@ public class WorldManager : MonoBehaviour {
     void Start(){
         pixelMaps = new pixelMap[tilesToLoad.Length];
         for(int setup = 0; setup < pixelMaps.Length; setup++) {
-            print("SetUp");
             pixelMaps[setup].setUp(tilesToLoad[setup]);
         }
         
@@ -139,12 +138,6 @@ public class WorldManager : MonoBehaviour {
 
     void Update(){
         checkForChunkUpdate();
-        
-        POV.transform.position += new Vector3(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical")) * Time.deltaTime * 4f;
-        if(Input.GetMouseButton(0)) POV.transform.position -= new Vector3(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y")) * 4f;
-        if(Input.mouseScrollDelta.y != 0f) POVscroll = Mathf.Clamp(POVscroll - Input.mouseScrollDelta.y, 5f, 200f);
-        POV.GetComponent<Camera>().orthographicSize = Mathf.Lerp(POV.GetComponent<Camera>().orthographicSize, POVscroll, Time.deltaTime * 10f);
-
         Stats.text = statsUpdate();
     }
 
@@ -195,13 +188,14 @@ public class WorldManager : MonoBehaviour {
     static float[] worldSize = {40000f, 40000f, 0.5f};
     public static float getContinent(Vector2 tilePos){
         float density = worldSize[1]/continentMargin[2];
-        float land = erodeTectonics((tilePos.x-worldSize[0]) / density, (tilePos.y-worldSize[1]) / density, 5f, new[]{density/4f, density/4f});
+        Vector2 st = new(tilePos.x + perlinOffset.x, tilePos.y + perlinOffset.y);
+        float land = erode((st.x-worldSize[0]) / density, (st.y-worldSize[1]) / density, 5f);//, new[]{0f, density/4f});
         if(Mathf.Abs(tilePos.x) > worldSize[0]/2f || Mathf.Abs(tilePos.y) > worldSize[1]/2f) land = 0f;
         return Mathf.Lerp( continentMargin[0], continentMargin[1], land);
     }
 
     public static float getLand(Vector2 tilePos){
-        Vector2 st = tectonic((tilePos.x * 0.333f + perlinOffset.x) / islandMargin[2], (tilePos.y * 0.333f + perlinOffset.y) / islandMargin[2], new[]{10f, 10f});
+        Vector2 st = tectonic((tilePos.x + perlinOffset.x) / islandMargin[2], (tilePos.y + perlinOffset.y) / islandMargin[2], new[]{10f, 10f});
         float land = Mathf.Pow( erode(st.x, st.y, 5f) , 2f );
         return Mathf.Clamp( Mathf.Lerp(islandMargin[0], islandMargin[1], land * getContinent(tilePos)) , 0f, 1f);
         //return Mathf.Clamp( Mathf.Lerp(islandMargin[0], islandMargin[1], Mathf.Pow( Mathf.PerlinNoise((tilePos.x * 0.333f + perlinOffset.x) / islandMargin[2], (tilePos.y * 0.333f + perlinOffset.y) / islandMargin[2]) , 2f )) , 0f, 1f);
@@ -217,17 +211,20 @@ public class WorldManager : MonoBehaviour {
         {0,1,3,3,1,3,3,2,2}, // Pure moor
     };
     public static Vector2 getBiome(Vector2 tilePos){
+        float[] errosionFactor = {
+            erode((tilePos.x + perlinOffset.x) / (biomeSize*10f), (tilePos.y + perlinOffset.y) / (biomeSize*10f), 15f),
+            erode((tilePos.x + perlinOffset.y) / biomeSize, (tilePos.y + perlinOffset.x) / biomeSize, 15f)};
         float sector = erode((tilePos.x*3.333f + perlinOffset.x) / (biomeSize*10f), (tilePos.y*3.333f + perlinOffset.y) / (biomeSize*10f), 15f) * 6.9f;
         float partition = erode((tilePos.x * 3.333f + perlinOffset.y) / biomeSize, (tilePos.y * 3.333f + perlinOffset.x) / biomeSize, 10f) * Mathf.Clamp(getWater(tilePos, 1)*24f, 0f, 7.9f);
         try {
             return new(biomeProgression[(int)sector, (int)partition], partition%1f);
         } catch (Exception e) {
-            print("Biome progression breached " + sector + "/6 - " + partition + "/8" + "\n" + e);
+            Debug.LogError("Biome progression breached " + sector + "/6 (errosion " + errosionFactor[0] + ") - " + partition + "/8" + "(errosion " + errosionFactor[1] + ")\n" + e);
             return Vector2.zero;
         }
         //return Mathf.Lerp(1f, Mathf.Clamp(7f, 0f, getWater(tilePos)*14f), erode((tilePos.x * 3.333f + perlinOffset.y) / biomeSize, (tilePos.y * 3.333f + perlinOffset.x) / biomeSize, 1f) % 1f );
     }
-    public static float riverDensity = 1600f;
+    public static float riverDensity = 10000f;
     public static float[] riverMargin = {0.45f, 0.5f, 0.05f};
     public static float riverBias(Vector2 Pos){
         float riverBase = erodeTectonics((Pos.y * 3.333f - perlinOffset.x) / riverDensity, (Pos.x * 3.333f - perlinOffset.y) / riverDensity, 10f, new[]{100f, 200f});
@@ -245,17 +242,17 @@ public class WorldManager : MonoBehaviour {
         float normal = Mathf.PerlinNoise(x, y);
         float eroded = Mathf.PerlinNoise(x * p, y * p);
         float mask = Mathf.PerlinNoise(y / 3f, x / 3f);
-        return Mathf.Lerp(normal, eroded, mask/2f);
+        return Mathf.Clamp( Mathf.Lerp(normal, eroded, mask/2f) , 0f, 1f );
     }
 
     public static Vector2 tectonic(float x, float y, float[] size){
-        float mask = Mathf.PerlinNoise(x / size[1], y / size[1]);
+        float mask = Mathf.Clamp(Mathf.PerlinNoise(x / size[1], y / size[1]), 0f, 1f);
         return Vector2.Lerp(new(x, y), new(x+size[0], y+size[0]), mask);
     }
 
     public static float erodeTectonics(float x, float y, float power, float[] shift){
         Vector2 shi = tectonic(x, y, shift);
-        return erode(x, y, power);
+        return erode(shi.x, shi.y, power);
     }
     // World generation values
 

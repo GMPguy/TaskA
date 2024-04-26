@@ -8,14 +8,22 @@ public class CanvasScript : MonoBehaviour {
     
     void Start(){
        GenerateMapTexture();
+       mcdText = MapCoorData.GetChild(0).GetComponent<Text>();
+       mp = MainPlayer.GetComponent<PlayerScript>();
     }
 
     void Update(){
         MapUpdate();
     }
 
+    // References
+    public Transform MainPlayer;
+    PlayerScript mp;
+
     // Map stuff
     [SerializeField] Transform MapAnchor;
+    [SerializeField] RectTransform MapCoorData;
+    Text mcdText;
     [SerializeField] RawImage Map;
     Texture2D MapTexture;
     int[] TextureSize = {1, 0, 1};
@@ -45,22 +53,35 @@ public class CanvasScript : MonoBehaviour {
         Vector2 e = Offset[0] + new Vector2(offsetedBlock[0] * BlocksPerPixel, offsetedBlock[1] * BlocksPerPixel);
         if(getWater(e) >= 0f) biomeColor = biomeColors[(int)getBiome(e).x];
         MapTexture.SetPixel(mapLoad[0]%TextureSize[0], mapLoad[0]/TextureSize[0], biomeColor);
-        //MapTexture.SetPixel(mapLoad[0]%TextureSize[0], mapLoad[0]/TextureSize[0], Color32.Lerp(Color.black, Color.white, getContinent(e) ));
+        //MapTexture.SetPixel(mapLoad[0]%TextureSize[0], mapLoad[0]/TextureSize[0], Color32.Lerp(Color.black, Color.white, getWater(e) ));
         mapLoad[0]++;
+    }
+
+    string mcdString(Vector2 tile){
+        return "x" + tile.x + "\ny" + tile.y;
     }
 
     void MapUpdate(){
         if(Input.GetKeyDown(KeyCode.M)) mapEnable = !mapEnable;
         if(mapEnable){
             MapAnchor.transform.localScale = Vector3.one;
+            mp.stun = Time.deltaTime*4f;
 
             float shiftPower = 25f;
+            Vector2 mousePos = (Input.mousePosition * this.GetComponent<CanvasScaler>().scaleFactor) - new Vector3(Screen.width/2f, Screen.height/2f);
+            Vector2 pointedPos = (mousePos * BlocksPerPixel) + Offset[0];
+            MapCoorData.anchoredPosition = mousePos;
+            mcdText.text = mcdString(pointedPos);
             if(Input.GetMouseButton(0) && mapEnable && shiftZoom[0] == BlocksPerPixel){
                 Offset[0] -= new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y")) * BlocksPerPixel * shiftPower;
                 Map.GetComponent<RectTransform>().anchoredPosition += new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y")) * shiftPower;
             } else if (Offset[1] != Offset[0]){
                 Offset[1] = Offset[0];
                 Map.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
+                GenerateMapTexture();
+            } else if (Input.GetMouseButtonDown(1)){
+                Offset[0] = pointedPos;
+                MainPlayer.position = pointedPos;
                 GenerateMapTexture();
             }
 

@@ -1291,7 +1291,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PaintBrush: {fileID: 0}
-  chunkSize: 32
+  chunkSize: 16
   amountOfMaps: 2
   ss: 32
 --- !u!1 &1995550464

@@ -89,7 +89,7 @@ public class ChunkedTextureDB : DrawBase {
     }
 
     void setTile(Cell target, Vector3 tChunk, Texture2D tTexture){
-        if(!target.isWater) StampImage( target.getPos(), tChunk, tTexture, getTM(target.biome, target.Height));
+        if(!target.isWater) StampImage( target.getPos(), tChunk, tTexture, getTM(target.biome, target.biomeSaturation));
         else StampColor(target.getPos(), tChunk, tTexture, Color.Lerp(new(0f, 0f, 0f, 0f), new(0f,0.1f,0.2f,1f), target.Height));
     }
 

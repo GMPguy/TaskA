@@ -45,6 +45,7 @@ public class CanvasScript : MonoBehaviour {
         Vector2 e = Offset[0] + new Vector2(offsetedBlock[0] * BlocksPerPixel, offsetedBlock[1] * BlocksPerPixel);
         if(getWater(e) >= 0f) biomeColor = biomeColors[(int)getBiome(e).x];
         MapTexture.SetPixel(mapLoad[0]%TextureSize[0], mapLoad[0]/TextureSize[0], biomeColor);
+        //MapTexture.SetPixel(mapLoad[0]%TextureSize[0], mapLoad[0]/TextureSize[0], Color32.Lerp(Color.black, Color.white, getContinent(e) ));
         mapLoad[0]++;
     }
 
@@ -63,7 +64,7 @@ public class CanvasScript : MonoBehaviour {
                 GenerateMapTexture();
             }
 
-            if(Input.mouseScrollDelta.y != 0f)  shiftZoom = new[]{Mathf.Clamp(shiftZoom[0] - Input.mouseScrollDelta.y/10f, 1f, 100f), 1f};
+            if(Input.mouseScrollDelta.y != 0f)  shiftZoom = new[]{Mathf.Clamp(shiftZoom[0] - Input.mouseScrollDelta.y, 1f, 100f), 1f};
             if(shiftZoom[0] != BlocksPerPixel){
                 Map.GetComponent<RectTransform>().localScale = Vector2.one * (BlocksPerPixel / shiftZoom[0]);
                 shiftZoom[1] -= Time.deltaTime;

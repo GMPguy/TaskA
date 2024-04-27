@@ -7,6 +7,7 @@ using UnityEngine.Tilemaps;
 using Random=UnityEngine.Random;
 using UnityEngine.UI;
 using static getStatic.WorldManager;
+using UnityEditor.Experimental.GraphView;
 
 namespace getStatic {
 public class WorldManager : MonoBehaviour {
@@ -28,9 +29,9 @@ public class WorldManager : MonoBehaviour {
         Vector2Int Pos;
         public bool isWater;
         public float Height;
-        //public int biome;
         public tileData ground;
         public float biomeSaturation;
+        public tileObject cellObject;
         public Cell(Vector2Int sPos){
             Pos = sPos;
             setData();
@@ -48,6 +49,8 @@ public class WorldManager : MonoBehaviour {
                 Height = checkWater;
                 ground = loadedTiles[(int)getBiome(new(Pos.x, Pos.y)).x];
                 biomeSaturation = getBiome(new(Pos.x, Pos.y)).y;
+                if(ground.chanceForObjects > 0f) cellObject = checkForObject(this);
+                else cellObject = null;
             }
         }
     };
@@ -77,6 +80,8 @@ public class WorldManager : MonoBehaviour {
         public Texture2D[] tileTextures;
         public int[] copyTextures;
         public pixelMap acquiredTiles;
+        public int[] possibleObjects;
+        public float chanceForObjects;
     }
 
     public struct pixelMap{
@@ -116,6 +121,18 @@ public class WorldManager : MonoBehaviour {
     }
     // Map tiles sprites
 
+    // Map objects
+    public tileObject[] objectsToLoad;
+    public static tileObject[] loadedObjects;
+    [System.Serializable]
+    public class tileObject{
+        public int objectID;
+        public string objectName;
+        public Texture2D objectSprite;
+        public int[] objectTrans = {0,0,0,0};
+    }
+    // Map objects
+
     // test tiles
     /*public static Color[] biomeColors = {
         new(.75f, .75f, 0.5f), // 0 - Sand
@@ -135,6 +152,8 @@ public class WorldManager : MonoBehaviour {
         for(int setup = 0; setup < loadedTiles.Length; setup++) loadedTiles[setup].acquiredTiles.setUp(loadedTiles[setup]);
         loadedBiomes = new biomeData[biomesToLoad.Length];
         biomesToLoad.CopyTo(loadedBiomes, 0);
+        loadedObjects = new tileObject[objectsToLoad.Length];
+        objectsToLoad.CopyTo(loadedObjects, 0);
 
         tilesToLoad = new tileData[0];
         biomesToLoad = new biomeData[0];
@@ -242,8 +261,18 @@ public class WorldManager : MonoBehaviour {
         }
         //return Mathf.Lerp(1f, Mathf.Clamp(7f, 0f, getWater(tilePos)*14f), erode((tilePos.x * 3.333f + perlinOffset.y) / biomeSize, (tilePos.y * 3.333f + perlinOffset.x) / biomeSize, 1f) % 1f );
     }
-    public static float riverDensity = 10000f;
-    public static float[] riverMargin = {0.45f, 0.5f, 0.05f};
+
+    static float[] objDiv = {10f, 25f};
+    public static tileObject checkForObject(Cell target){
+        tileData ground = target.ground;
+        int choosen = (int)(erode(target.getPos().y / objDiv[1], target.getPos().x / objDiv[1], objDiv[1]) * ground.possibleObjects.Length-0.1f);
+        float chance = erode(target.getPos().y / objDiv[0], target.getPos().x / objDiv[0], objDiv[1]);
+        if (1f - chance >= ground.chanceForObjects) return loadedObjects[ground.possibleObjects[choosen]];
+        else return null;
+    }
+
+    static float riverDensity = 10000f;
+    static float[] riverMargin = {0.45f, 0.5f, 0.05f};
     public static float riverBias(Vector2 Pos){
         float riverBase = erodeTectonics((Pos.y * 3.333f - perlinOffset.x) / riverDensity, (Pos.x * 3.333f - perlinOffset.y) / riverDensity, 10f, new[]{100f, 200f});
         if(riverBase >= riverMargin[0] && riverBase <= riverMargin[1]) return Mathf.Pow( Mathf.Sin((riverBase-riverMargin[0]) / riverMargin[2] * Mathf.PI) , 3f);

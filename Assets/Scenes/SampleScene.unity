@@ -607,6 +607,7 @@ MonoBehaviour:
   POV: {fileID: 519420032}
   tilesToLoad:
   - tileID: 0
+    saturationMethod: 0
     tileName: Beach sand
     tileColor:
       serializedVersion: 2
@@ -619,7 +620,10 @@ MonoBehaviour:
     - {fileID: 2800000, guid: 7f51572fc769b074aa9eeabb6dfc5ba6, type: 3}
     - {fileID: 2800000, guid: 3c80f47b3f83177479c413f290db1ec5, type: 3}
     copyTextures: 
+    possibleObjects: 
+    chanceForObjects: 0
   - tileID: 1
+    saturationMethod: 0
     tileName: Plains
     tileColor:
       serializedVersion: 2
@@ -631,7 +635,10 @@ MonoBehaviour:
     - {fileID: 2800000, guid: 6ddf773eec6109c4db7be7395ff9aae3, type: 3}
     - {fileID: 2800000, guid: c458d24a1acfeac42932ea7603f97726, type: 3}
     copyTextures: 
+    possibleObjects: 
+    chanceForObjects: 0
   - tileID: 2
+    saturationMethod: 0
     tileName: Farmlands
     tileColor:
       serializedVersion: 2
@@ -643,7 +650,10 @@ MonoBehaviour:
     - {fileID: 2800000, guid: c1a180a0dd17c9e45b5f176e5442181a, type: 3}
     - {fileID: 2800000, guid: 535e8bb00fd72c44688fad588f7459aa, type: 3}
     copyTextures: 
+    possibleObjects: 
+    chanceForObjects: 0
   - tileID: 3
+    saturationMethod: 0
     tileName: Moor
     tileColor:
       serializedVersion: 2
@@ -680,7 +690,10 @@ MonoBehaviour:
     - {fileID: 0}
     - {fileID: 0}
     copyTextures: 00000000010000000200000003000000040000000a0000000b0000000c0000000d0000000e0000001400000015000000160000001700000018000000
+    possibleObjects: 
+    chanceForObjects: 0
   - tileID: 4
+    saturationMethod: 0
     tileName: Forest
     tileColor:
       serializedVersion: 2
@@ -695,7 +708,10 @@ MonoBehaviour:
     - {fileID: 2800000, guid: a561f28adb4cebf4f8fe269e1f99a04b, type: 3}
     - {fileID: 2800000, guid: 0fdf224980f6ab9488770a0ba5e5fd5e, type: 3}
     copyTextures: 
+    possibleObjects: 00000000
+    chanceForObjects: 1
   - tileID: 5
+    saturationMethod: 0
     tileName: Tundra
     tileColor:
       serializedVersion: 2
@@ -707,7 +723,10 @@ MonoBehaviour:
     - {fileID: 2800000, guid: 9316fdf116d61c54c8e1112e067859e8, type: 3}
     - {fileID: 2800000, guid: 3310f0f10696baf43aabb8b49ce5193c, type: 3}
     copyTextures: 
+    possibleObjects: 
+    chanceForObjects: 0
   - tileID: 6
+    saturationMethod: 0
     tileName: Mountains
     tileColor:
       serializedVersion: 2
@@ -721,7 +740,10 @@ MonoBehaviour:
     - {fileID: 2800000, guid: 6d78c5961c552ce4d960eadf49db6939, type: 3}
     - {fileID: 2800000, guid: 729808c7e264e2445b10c9ef23172b45, type: 3}
     copyTextures: 
+    possibleObjects: 
+    chanceForObjects: 0
   - tileID: 7
+    saturationMethod: 0
     tileName: Snow
     tileColor:
       serializedVersion: 2
@@ -729,6 +751,13 @@ MonoBehaviour:
     tileTextures:
     - {fileID: 2800000, guid: 6c08b52a9925fec45bccc0f3a6ed573c, type: 3}
     copyTextures: 
+    possibleObjects: 
+    chanceForObjects: 0
+  objectsToLoad:
+  - objectID: 0
+    objectName: Spruce
+    objectSprite: {fileID: 2800000, guid: 3c7fd3f1f5d4ad548b9a36bcfd5d2d33, type: 3}
+    objectTrans: 
   Stats: {fileID: 4270176}
   biomesToLoad:
   - biomeID: 0

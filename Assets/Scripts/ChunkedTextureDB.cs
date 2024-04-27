@@ -56,17 +56,17 @@ public class ChunkedTextureDB : DrawBase {
     void Update(){
         if(Mathf.Abs(POV.position.x-cfoPP.x) > objChunkSize[1] || Mathf.Abs(POV.position.y-cfoPP.y) > objChunkSize[1]){
             cfoPP = new(Mathf.Round(POV.position.x / objChunkSize[1]) * objChunkSize[1], Mathf.Round(POV.position.y / objChunkSize[1]) * objChunkSize[1]);
-            Vector2Int targetOffset = new Vector2Int((int)POV.position.x, (int)POV.position.y);
-            if(hasLoadedTiles && Loaded != null) updateTileObjects(Loaded);
-            else if(!hasLoadedTiles && newCache != null) updateTileObjects(newCache);
+            if(Loaded != null) updateTileObjects(Loaded);
         }
     }
 
     void updateTileObjects(Cell[,] targetArray){
-        Vector2 locPos = new Vector2(POV.transform.position.x, POV.transform.position.y) - (loadPos - new Vector2(MapSize/2f, MapSize/2f));
+        Vector2 locPos = new Vector2(POV.transform.position.x, POV.transform.position.y) - (currPos - new Vector2(MapSize/2f, MapSize/2f));
         for(int sy = 0; sy < objChunkSize[0]-1; sy++) for (int sx = 0; sx < objChunkSize[0]-1; sx++) {
             Vector2Int cellOffset = new Vector2Int((int)locPos.x + sx - objChunkSize[0]/2, (int)locPos.y + sy - objChunkSize[0]/2);
-            setObj(sx, sy, targetArray[cellOffset.x, cellOffset.y]);
+            if(cellOffset.x > 0f && cellOffset.x < MapSize-1 && cellOffset.y > 0f && cellOffset.y < MapSize-1){
+                setObj(sx, sy, targetArray[cellOffset.x, cellOffset.y]);
+            }
         }
     }
 
@@ -109,13 +109,16 @@ public class ChunkedTextureDB : DrawBase {
         if(x%chunkSize == chunkMargin[0] && y%chunkSize == chunkMargin[1]){
             setChunk(
                 blur, // xy for bl - xy for ur
-                new []{x/chunkSize, y/chunkSize}
+                new []{MapSize/chunkSize-1 - x/chunkSize, MapSize/chunkSize-1 - y/chunkSize}
             );
         }
 
         if(loadChunk[0] >= loadChunk[1]-1) {
+            currPos = loadPos;
+            cfoPP = Vector2.one * -9999f;
             Loaded = newCache;
             hasLoadedTiles = true;
+            newCache = new Cell[0,0];
          }
     }
 

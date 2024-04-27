@@ -172,10 +172,7 @@ public class WorldManager : MonoBehaviour {
                 loadChunk[0]++;
             }
         } else if (loadChunk[0] == loadChunk[1]) {
-            //Loaded = newCache;
-            //newCache = new Cell[0,0];
             loadChunk[0] = loadChunk[1]+1;
-            currPos = loadPos;
         }
 
         if((Mathf.Abs(POV.position.x-prevPos.x) > PushDist || Mathf.Abs(POV.position.y-prevPos.y) > PushDist) && loadChunk[0] > loadChunk[1]){

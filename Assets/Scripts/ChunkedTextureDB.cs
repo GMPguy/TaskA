@@ -6,15 +6,16 @@ using static getStatic.WorldManager;
 
 public class ChunkedTextureDB : DrawBase {
 
-    public Transform[,] chunkTransforms, objRefs;
-    public Texture2D[,] chunkTextures;
-    public Material[,] objTexs;
+    public Transform POV;
+    Transform[,] chunkTransforms, objRefs;
+    Texture2D[,] chunkTextures;
+    Material[,] objTexs;
     public int chunkSize = 32;
-    public int amountOfMaps = 2;
     int currMap = 0;
     public int ss = 32;
-    public int objChunkSize = 1;
+    public int[] objChunkSize = {4, 2};
     bool hasLoadedTiles = false;
+    Vector2 cfoPP;
 
     public override void initializeSystem(){
         PushDist *= chunkSize;
@@ -33,22 +34,40 @@ public class ChunkedTextureDB : DrawBase {
             chunkTextures[smY, smX] = nt;
         }
 
-        int objPerChunk = MapSize/objChunkSize;
         GameObject firstObject = this.transform.GetChild(1).GetChild(0).gameObject;
-        objRefs = new Transform[objPerChunk, objPerChunk];
-        objTexs = new Material[objPerChunk, objPerChunk];
-        for(int smY = 0; smY < objPerChunk; smY++) for(int smX = 0; smX < objPerChunk; smX++){
+        objRefs = new Transform[objChunkSize[0], objChunkSize[0]];
+        objTexs = new Material[objChunkSize[0], objChunkSize[0]];
+        for(int smY = 0; smY < objChunkSize[0]; smY++) for(int smX = 0; smX < objChunkSize[0]; smX++){
             GameObject anotherObj = Instantiate(firstObject);
             objRefs[smY, smX] = anotherObj.transform;
+            objRefs[smY, smX].localScale = Vector3.one * 0.9f;
             objRefs[smY, smX].SetParent(this.transform.GetChild(1));
             objRefs[smY, smX].GetComponent<MeshRenderer>().material.mainTexture.filterMode = FilterMode.Point;
             objTexs[smY, smX] = objRefs[smY, smX].GetComponent<MeshRenderer>().material;
-            objRefs[smY, smX].gameObject.SetActive(false);
+            //objRefs[smY, smX].gameObject.SetActive(false);
         }
+        cfoPP = Vector3.one * 999f;
 
         Destroy(FirstChunk);
         Destroy(firstObject);
 
+    }
+
+    void Update(){
+        if(Mathf.Abs(POV.position.x-cfoPP.x) > objChunkSize[1] || Mathf.Abs(POV.position.y-cfoPP.y) > objChunkSize[1]){
+            cfoPP = new(Mathf.Round(POV.position.x / objChunkSize[1]) * objChunkSize[1], Mathf.Round(POV.position.y / objChunkSize[1]) * objChunkSize[1]);
+            Vector2Int targetOffset = new Vector2Int((int)POV.position.x, (int)POV.position.y);
+            if(hasLoadedTiles && Loaded != null) updateTileObjects(Loaded);
+            else if(!hasLoadedTiles && newCache != null) updateTileObjects(newCache);
+        }
+    }
+
+    void updateTileObjects(Cell[,] targetArray){
+        Vector2 locPos = new Vector2(POV.transform.position.x, POV.transform.position.y) - (loadPos - new Vector2(MapSize/2f, MapSize/2f));
+        for(int sy = 0; sy < objChunkSize[0]-1; sy++) for (int sx = 0; sx < objChunkSize[0]-1; sx++) {
+            Vector2Int cellOffset = new Vector2Int((int)locPos.x + sx - objChunkSize[0]/2, (int)locPos.y + sy - objChunkSize[0]/2);
+            setObj(sx, sy, targetArray[cellOffset.x, cellOffset.y]);
+        }
     }
 
     public override void beginLoad(Vector3 there){
@@ -81,13 +100,11 @@ public class ChunkedTextureDB : DrawBase {
             blur[3] = y+chunkSize-1;
         }
         
-        
         if( (diff.x < 0 && x >= -diff.x || diff.x > 0 && x < MapSize-diff.x || diff.x == 0f) && (diff.y < 0 && y >= -diff.y || diff.y > 0 && y < MapSize-diff.y || diff.y == 0f) ) {
             newCache[x, y] = Loaded[x + (int)diff.x, y + (int)diff.y];
         } else { 
             newCache[x, y] = new(new(MapSize/-2 + x + (int)loadPos.x, MapSize/-2 + y + (int)loadPos.y));
         }
-        setObj(x, y, newCache[x, y]);
 
         if(x%chunkSize == chunkMargin[0] && y%chunkSize == chunkMargin[1]){
             setChunk(
@@ -97,15 +114,15 @@ public class ChunkedTextureDB : DrawBase {
         }
 
         if(loadChunk[0] >= loadChunk[1]-1) {
+            Loaded = newCache;
             hasLoadedTiles = true;
          }
     }
 
     void setObj(int x, int y, Cell t){
-        if(t.cellObject != null){
+        if(t != null && t.cellObject != null){
             tileObject o = t.cellObject;
             if (!objRefs[x, y].gameObject.activeSelf) objRefs[x, y].gameObject.SetActive(true);
-            print(o.objectName);
             objRefs[x, y].position = t.getPos() + o.getPivot();
             objRefs[x, y].position -= Vector3.forward/100f;
             objRefs[x, y].localScale = o.getScale();

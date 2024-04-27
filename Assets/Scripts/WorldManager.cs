@@ -135,18 +135,6 @@ public class WorldManager : MonoBehaviour {
     }
     // Map objects
 
-    // test tiles
-    /*public static Color[] biomeColors = {
-        new(.75f, .75f, 0.5f), // 0 - Sand
-        new(0.5f, 1f, 0f), // 1 - Plain
-        new(1f, 1f, 0f), // 2 - Farms
-        new(1f, 0.5f, 1f), // 3 - Moor
-        new(0f,0.5f,0f), // 4 - Forest
-        new(0.5f, 0.5f, 0f), // 5 - Tundra
-        new(0.5f, 0.5f, 0.5f), // 6 - Mountain
-        new(1f, 1f, 1f) // 7 - Snow
-    };*/
-
     void Start(){
 
         loadedTiles = new tileData[tilesToLoad.Length];
@@ -184,7 +172,8 @@ public class WorldManager : MonoBehaviour {
                 loadChunk[0]++;
             }
         } else if (loadChunk[0] == loadChunk[1]) {
-            Loaded = newCache;
+            //Loaded = newCache;
+            //newCache = new Cell[0,0];
             loadChunk[0] = loadChunk[1]+1;
             currPos = loadPos;
         }
@@ -269,7 +258,7 @@ public class WorldManager : MonoBehaviour {
         tileData ground = target.ground;
         int choosen = (int)(erode(target.getPos().y / objDiv[1], target.getPos().x / objDiv[1], objDiv[1]) * ground.possibleObjects.Length-0.1f);
         float chance = erode(target.getPos().y / objDiv[0], target.getPos().x / objDiv[0], objDiv[1]);
-        if (1f - chance >= ground.chanceForObjects) return loadedObjects[ground.possibleObjects[choosen]];
+        if (1f - chance <= ground.chanceForObjects) return loadedObjects[ground.possibleObjects[choosen]];
         else return null;
     }
 

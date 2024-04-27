@@ -37,7 +37,6 @@ public class WorldManager : MonoBehaviour {
             setData();
         }
         public void pushPos(Vector2 newP){ Pos += new Vector2Int((int)newP.x, (int)newP.y); }
-        public void pushPosPos(Vector2Int newP){ Pos += new Vector2Int(newP.x, newP.y); }
         public Vector2 getPos(){ return new(Pos.x, Pos.y); }
         void setData(){
             float checkWater = getWater(new(Pos.x, Pos.y));
@@ -129,7 +128,10 @@ public class WorldManager : MonoBehaviour {
         public int objectID;
         public string objectName;
         public Texture2D objectSprite;
-        public int[] objectTrans = {0,0,0,0};
+        public int[] objTra = {0,0,0,0};
+        public Vector2 getScale(){ return new Vector2(objTra[0]/32, objTra[1]/32); }
+        public Vector2 getPivot(){ return new Vector2(objTra[2]/32, objTra[3]/32); }
+        public Texture2D getTexture(){ return objectSprite; }
     }
     // Map objects
 

@@ -6,30 +6,49 @@ using static getStatic.WorldManager;
 
 public class ChunkedTextureDB : DrawBase {
 
-    public Transform[,] chunkTransforms;
+    public Transform[,] chunkTransforms, objRefs;
     public Texture2D[,] chunkTextures;
-    public Transform PaintBrush;
+    public Material[,] objTexs;
     public int chunkSize = 32;
     public int amountOfMaps = 2;
     int currMap = 0;
     public int ss = 32;
+    public int objChunkSize = 1;
+    bool hasLoadedTiles = false;
 
     public override void initializeSystem(){
         PushDist *= chunkSize;
-        GameObject FirstChunk = this.transform.GetChild(0).gameObject;
+        GameObject FirstChunk = this.transform.GetChild(0).GetChild(0).gameObject;
         int chunksPerWidth = MapSize/chunkSize;
         chunkTransforms = new Transform[chunksPerWidth, chunksPerWidth];
         chunkTextures = new Texture2D[chunksPerWidth, chunksPerWidth];
         for(int smY = 0; smY < chunksPerWidth; smY++) for(int smX = 0; smX < chunksPerWidth; smX++){
             GameObject anotherChunk = Instantiate(FirstChunk);
             chunkTransforms[smY, smX] = anotherChunk.transform;
+            chunkTransforms[smY, smX].SetParent(this.transform.GetChild(0));
             chunkTransforms[smY, smX].localScale = Vector3.one*chunkSize;
             Texture2D nt = new Texture2D(chunkSize*ss, chunkSize*ss);
             chunkTransforms[smY, smX].GetComponent<MeshRenderer>().material.mainTexture = nt;
             chunkTransforms[smY, smX].GetComponent<MeshRenderer>().material.mainTexture.filterMode = FilterMode.Point;
             chunkTextures[smY, smX] = nt;
         }
+
+        int objPerChunk = MapSize/objChunkSize;
+        GameObject firstObject = this.transform.GetChild(1).GetChild(0).gameObject;
+        objRefs = new Transform[objPerChunk, objPerChunk];
+        objTexs = new Material[objPerChunk, objPerChunk];
+        for(int smY = 0; smY < objPerChunk; smY++) for(int smX = 0; smX < objPerChunk; smX++){
+            GameObject anotherObj = Instantiate(firstObject);
+            objRefs[smY, smX] = anotherObj.transform;
+            objRefs[smY, smX].SetParent(this.transform.GetChild(1));
+            objRefs[smY, smX].GetComponent<MeshRenderer>().material.mainTexture.filterMode = FilterMode.Point;
+            objTexs[smY, smX] = objRefs[smY, smX].GetComponent<MeshRenderer>().material;
+            objRefs[smY, smX].gameObject.SetActive(false);
+        }
+
         Destroy(FirstChunk);
+        Destroy(firstObject);
+
     }
 
     public override void beginLoad(Vector3 there){
@@ -39,6 +58,7 @@ public class ChunkedTextureDB : DrawBase {
         loadPos = there;
         newCache = new Cell[MapSize, MapSize];
         loadChunk = new[]{0, MapSize*MapSize};
+        hasLoadedTiles = false;
     }
 
     
@@ -67,6 +87,7 @@ public class ChunkedTextureDB : DrawBase {
         } else { 
             newCache[x, y] = new(new(MapSize/-2 + x + (int)loadPos.x, MapSize/-2 + y + (int)loadPos.y));
         }
+        setObj(x, y, newCache[x, y]);
 
         if(x%chunkSize == chunkMargin[0] && y%chunkSize == chunkMargin[1]){
             setChunk(
@@ -75,7 +96,23 @@ public class ChunkedTextureDB : DrawBase {
             );
         }
 
-        if(loadChunk[0] >= loadChunk[1]-1) { }
+        if(loadChunk[0] >= loadChunk[1]-1) {
+            hasLoadedTiles = true;
+         }
+    }
+
+    void setObj(int x, int y, Cell t){
+        if(t.cellObject != null){
+            tileObject o = t.cellObject;
+            if (!objRefs[x, y].gameObject.activeSelf) objRefs[x, y].gameObject.SetActive(true);
+            print(o.objectName);
+            objRefs[x, y].position = t.getPos() + o.getPivot();
+            objRefs[x, y].position -= Vector3.forward/100f;
+            objRefs[x, y].localScale = o.getScale();
+            objTexs[x, y].mainTexture = o.getTexture();
+        } else if (objRefs[x, y].gameObject.activeSelf) {
+            objRefs[x, y].gameObject.SetActive(false);
+        }
     }
 
     void setChunk(int[] cc, int[] gc){

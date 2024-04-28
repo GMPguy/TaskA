@@ -601,8 +601,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4716805a5dab3b489929b5ce148e57f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Seed: 514587
-  RandomGeneration: 1
+  Seed: 999999
+  RandomGeneration: 0
   drawingMechanism: {fileID: 1857958394}
   POV: {fileID: 519420032}
   tilesToLoad:
@@ -1849,9 +1849,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   POV: {fileID: 519420032}
-  chunkSize: 8
+  chunkSize: 32
   ss: 32
-  objChunkSize: 0200000014000000
+  objChunkSize: 8000000010000000
 --- !u!1 &1995550464
 GameObject:
   m_ObjectHideFlags: 0

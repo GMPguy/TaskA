@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
@@ -7,9 +8,10 @@ using static getStatic.WorldManager;
 public class ChunkedTextureDB : DrawBase {
 
     public Transform POV;
-    Transform[,] chunkTransforms, objRefs;
+    public Transform[,] chunkTransforms, objRefs;
     Texture2D[,] chunkTextures;
     Material[,] objTexs;
+    int[,] needRewrite;
     public int chunkSize = 32;
     int currMap = 0;
     public int ss = 32;
@@ -23,15 +25,16 @@ public class ChunkedTextureDB : DrawBase {
         int chunksPerWidth = MapSize/chunkSize;
         chunkTransforms = new Transform[chunksPerWidth, chunksPerWidth];
         chunkTextures = new Texture2D[chunksPerWidth, chunksPerWidth];
+        needRewrite = new int[chunksPerWidth, chunksPerWidth];
         for(int smY = 0; smY < chunksPerWidth; smY++) for(int smX = 0; smX < chunksPerWidth; smX++){
             GameObject anotherChunk = Instantiate(FirstChunk);
-            chunkTransforms[smY, smX] = anotherChunk.transform;
-            chunkTransforms[smY, smX].SetParent(this.transform.GetChild(0));
-            chunkTransforms[smY, smX].localScale = Vector3.one*chunkSize;
+            chunkTransforms[smX, smY] = anotherChunk.transform;
+            chunkTransforms[smX, smY].SetParent(this.transform.GetChild(0));
+            chunkTransforms[smX, smY].localScale = Vector3.one*chunkSize;
             Texture2D nt = new Texture2D(chunkSize*ss, chunkSize*ss);
-            chunkTransforms[smY, smX].GetComponent<MeshRenderer>().material.mainTexture = nt;
-            chunkTransforms[smY, smX].GetComponent<MeshRenderer>().material.mainTexture.filterMode = FilterMode.Point;
-            chunkTextures[smY, smX] = nt;
+            chunkTransforms[smX, smY].GetComponent<MeshRenderer>().material.mainTexture = nt;
+            chunkTransforms[smX, smY].GetComponent<MeshRenderer>().material.mainTexture.filterMode = FilterMode.Point;
+            chunkTextures[smX, smY] = nt;
         }
 
         GameObject firstObject = this.transform.GetChild(1).GetChild(0).gameObject;
@@ -39,12 +42,12 @@ public class ChunkedTextureDB : DrawBase {
         objTexs = new Material[objChunkSize[0], objChunkSize[0]];
         for(int smY = 0; smY < objChunkSize[0]; smY++) for(int smX = 0; smX < objChunkSize[0]; smX++){
             GameObject anotherObj = Instantiate(firstObject);
-            objRefs[smY, smX] = anotherObj.transform;
-            objRefs[smY, smX].localScale = Vector3.one * 0.9f;
-            objRefs[smY, smX].SetParent(this.transform.GetChild(1));
-            objRefs[smY, smX].GetComponent<MeshRenderer>().material.mainTexture.filterMode = FilterMode.Point;
-            objTexs[smY, smX] = objRefs[smY, smX].GetComponent<MeshRenderer>().material;
-            //objRefs[smY, smX].gameObject.SetActive(false);
+            objRefs[smX, smY] = anotherObj.transform;
+            objRefs[smX, smY].localScale = Vector3.one * 0.9f;
+            objRefs[smX, smY].SetParent(this.transform.GetChild(1));
+            objRefs[smX, smY].GetComponent<MeshRenderer>().material.mainTexture.filterMode = FilterMode.Point;
+            objTexs[smX, smY] = objRefs[smX, smY].GetComponent<MeshRenderer>().material;
+            objRefs[smX, smY].gameObject.SetActive(false);
         }
         cfoPP = Vector3.one * 999f;
 
@@ -104,13 +107,23 @@ public class ChunkedTextureDB : DrawBase {
             newCache[x, y] = Loaded[x + (int)diff.x, y + (int)diff.y];
         } else { 
             newCache[x, y] = new(new(MapSize/-2 + x + (int)loadPos.x, MapSize/-2 + y + (int)loadPos.y));
+            needRewrite[x/chunkSize, y/chunkSize] = 1;
         }
 
         if(x%chunkSize == chunkMargin[0] && y%chunkSize == chunkMargin[1]){
-            setChunk(
-                blur, // xy for bl - xy for ur
-                new []{MapSize/chunkSize-1 - x/chunkSize, MapSize/chunkSize-1 - y/chunkSize}
-            );
+            int[] getOld = new[]{MapSize/chunkSize - 1 - x/chunkSize, MapSize/chunkSize - 1 - y/chunkSize};
+            int[] pushOld = new[]{(int)(diff.x/chunkSize), (int)(diff.y/chunkSize)};
+            if(needRewrite[x/chunkSize, y/chunkSize] == 1){
+                setChunk(
+                    blur, // xy for bl - xy for ur
+                    getOld
+                );
+            } else {
+                copyChunk(
+                    new[]{getOld[0]+pushOld[0], getOld[1]+pushOld[0]},
+                    getOld
+                );
+            }
         }
 
         if(loadChunk[0] >= loadChunk[1]-1) {
@@ -143,6 +156,12 @@ public class ChunkedTextureDB : DrawBase {
             setTile(newCache[x, y], chunkTransforms[gc[0], gc[1]].position, chunkTextures[gc[0], gc[1]]);
         }
         chunkTextures[gc[0], gc[1]].Apply();
+    }
+
+    void copyChunk(int[] from, int[] to){
+        chunkTransforms[to[0], to[1]].position = chunkTransforms[from[0], from[1]].position;
+        chunkTransforms[to[0], to[1]].localScale = Vector3.one * chunkSize;
+        chunkTextures[to[0], to[1]].LoadRawTextureData(chunkTextures[from[0], from[0]].GetRawTextureData());
     }
 
     void setTile(Cell target, Vector3 tChunk, Texture2D tTexture){

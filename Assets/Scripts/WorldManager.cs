@@ -18,8 +18,8 @@ public class WorldManager : MonoBehaviour {
     static Vector2 perlinOffset;
 
     // Cell info
-    public static int MapSize = 320;
-    public static int PushDist = 5;
+    public static int MapSize = 160;
+    public static int PushDist = 1;
     public static readonly int[] ParseSpeed = {100, 1000};
     public static Cell[,] Loaded;
     public static Vector2 currPos;
@@ -185,6 +185,7 @@ public class WorldManager : MonoBehaviour {
     // Stats monitor
     public Text Stats;
     string statsUpdate(){
+        ChunkedTextureDB fcuk = GameObject.FindObjectOfType<ChunkedTextureDB>();
         string result = "FPS: " + (1f/Time.unscaledDeltaTime).ToString();
         if(loadChunk[0] < loadChunk[1]) result += "\nLoading tiles: " + loadChunk[0] + "/" + loadChunk[1] + " speed: " + (int)Mathf.Lerp(ParseSpeed[0], ParseSpeed[1], psLerp) + "/" + ParseSpeed[1];
         else result += "\nMap loaded";

@@ -8,7 +8,9 @@ using static getStatic.WorldManager;
 public class ChunkedTextureDB : DrawBase {
 
     public Transform POV;
+    float prevZ = 0f;
     public Transform[,] chunkTransforms, objRefs;
+    int[,] updateRots;
     Texture2D[,] chunkTextures;
     Material[,] objTexs;
     int[,] needRewrite;
@@ -17,7 +19,7 @@ public class ChunkedTextureDB : DrawBase {
     public int ss = 32;
     public int[] objChunkSize = {4, 2};
     bool hasLoadedTiles = false;
-    Vector2 cfoPP;
+    Vector2[] cfoPP;
 
     public override void initializeSystem(){
         PushDist *= chunkSize;
@@ -40,6 +42,7 @@ public class ChunkedTextureDB : DrawBase {
         GameObject firstObject = this.transform.GetChild(1).GetChild(0).gameObject;
         objRefs = new Transform[objChunkSize[0], objChunkSize[0]];
         objTexs = new Material[objChunkSize[0], objChunkSize[0]];
+        updateRots = new int[objChunkSize[0], objChunkSize[0]];
         for(int smY = 0; smY < objChunkSize[0]; smY++) for(int smX = 0; smX < objChunkSize[0]; smX++){
             GameObject anotherObj = Instantiate(firstObject);
             objRefs[smX, smY] = anotherObj.transform;
@@ -49,7 +52,7 @@ public class ChunkedTextureDB : DrawBase {
             objTexs[smX, smY] = objRefs[smX, smY].GetComponent<MeshRenderer>().material;
             objRefs[smX, smY].gameObject.SetActive(false);
         }
-        cfoPP = Vector3.one * 999f;
+        cfoPP = new Vector2[]{ Vector3.one * 999f, Vector3.zero};
 
         Destroy(FirstChunk);
         Destroy(firstObject);
@@ -57,16 +60,26 @@ public class ChunkedTextureDB : DrawBase {
     }
 
     void Update(){
-        if(Mathf.Abs(POV.position.x-cfoPP.x) > objChunkSize[1] || Mathf.Abs(POV.position.y-cfoPP.y) > objChunkSize[1]){
-            cfoPP = new(Mathf.Round(POV.position.x / objChunkSize[1]) * objChunkSize[1], Mathf.Round(POV.position.y / objChunkSize[1]) * objChunkSize[1]);
+        if(Mathf.Abs(POV.position.x-cfoPP[0].x) > objChunkSize[1] || Mathf.Abs(POV.position.y-cfoPP[0].y) > objChunkSize[1]){
             if(Loaded != null) updateTileObjects(Loaded);
+            cfoPP[0] = new(Mathf.Round(POV.position.x / objChunkSize[1]) * objChunkSize[1], Mathf.Round(POV.position.y / objChunkSize[1]) * objChunkSize[1]);
+        }
+
+        if(POV.eulerAngles.z != prevZ){
+            prevZ = POV.eulerAngles.z;
+            for (int ry = 0; ry < objChunkSize[0]-1; ry++) for (int rx = 0; rx < objChunkSize[0]-1; rx++) if (updateRots[rx, ry] == 1) {
+                Vector2Int cellOffset = new Vector2Int((int)cfoPP[1].x + rx - objChunkSize[0]/2, (int)cfoPP[1].y + ry - objChunkSize[0]/2);
+                if(cellOffset.x > 0f && cellOffset.x < MapSize-1 && cellOffset.y > 0f && cellOffset.y < MapSize-1){
+                    rotObj(rx, ry, Loaded[cellOffset.x, cellOffset.y]);
+                }
+            }
         }
     }
 
     void updateTileObjects(Cell[,] targetArray){
-        Vector2 locPos = new Vector2(POV.transform.position.x, POV.transform.position.y) - (currPos - new Vector2(MapSize/2f, MapSize/2f));
+        cfoPP[1] = new Vector2(POV.position.x, POV.position.y) - (currPos - new Vector2(MapSize/2f, MapSize/2f));
         for(int sy = 0; sy < objChunkSize[0]-1; sy++) for (int sx = 0; sx < objChunkSize[0]-1; sx++) {
-            Vector2Int cellOffset = new Vector2Int((int)locPos.x + sx - objChunkSize[0]/2, (int)locPos.y + sy - objChunkSize[0]/2);
+            Vector2Int cellOffset = new Vector2Int((int)cfoPP[1].x + sx - objChunkSize[0]/2, (int)cfoPP[1].y + sy - objChunkSize[0]/2);
             if(cellOffset.x > 0f && cellOffset.x < MapSize-1 && cellOffset.y > 0f && cellOffset.y < MapSize-1){
                 setObj(sx, sy, targetArray[cellOffset.x, cellOffset.y]);
             }
@@ -128,7 +141,7 @@ public class ChunkedTextureDB : DrawBase {
 
         if(loadChunk[0] >= loadChunk[1]-1) {
             currPos = loadPos;
-            cfoPP = Vector2.one * -9999f;
+            cfoPP[0] = Vector2.one * -9999f;
             Loaded = newCache;
             hasLoadedTiles = true;
             newCache = new Cell[0,0];
@@ -144,9 +157,18 @@ public class ChunkedTextureDB : DrawBase {
             objRefs[x, y].position -= Vector3.forward*o.getZ(-POV.up, objRefs[x, y].position - POV.position, objChunkSize[0]);
             objRefs[x, y].localScale = o.getScale();
             objTexs[x, y].mainTexture = o.getTexture();
+            updateRots[x, y] = 1;
         } else if (objRefs[x, y].gameObject.activeSelf) {
             objRefs[x, y].gameObject.SetActive(false);
+            updateRots[x, y] = 0;
         }
+    }
+
+    void rotObj(int x, int y, Cell t){
+        tileObject o = t.cellObject;
+        objRefs[x, y].position = t.getPos() + o.getPivot(ref POV);
+        objRefs[x, y].eulerAngles = POV.eulerAngles;
+        objRefs[x, y].position -= Vector3.forward*o.getZ(-POV.up, objRefs[x, y].position - POV.position, objChunkSize[0]);
     }
 
     void setChunk(int[] cc, int[] gc){

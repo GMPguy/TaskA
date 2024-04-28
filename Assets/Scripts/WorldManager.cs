@@ -261,8 +261,8 @@ public class WorldManager : MonoBehaviour {
 
     public static tileObject checkForObject(Cell target){
         tileData ground = target.ground;
-        int choosen = (int)(erode(target.getPos().y / ground.chanceFO[1], target.getPos().x / ground.chanceFO[1], 10f) * ground.possibleObjects.Length-0.1f);
-        float chance = erode(target.getPos().y / ground.chanceFO[1], target.getPos().x / ground.chanceFO[1], 10f);
+        int choosen = (int)(saturatedPerlin(target.getPos().y / ground.chanceFO[1], target.getPos().x / ground.chanceFO[1], 1f) * ground.possibleObjects.Length-0.1f);
+        float chance = erode(target.getPos().x / ground.chanceFO[1], target.getPos().y / ground.chanceFO[1], 10f);
         if (1f - chance <= ground.chanceFO[0]) return loadedObjects[ground.possibleObjects[choosen]];
         else return null;
     }
@@ -298,6 +298,10 @@ public class WorldManager : MonoBehaviour {
         return erode(shi.x, shi.y, power);
     }
     // World generation values
+
+    public static float saturatedPerlin(float x, float y, float offset){
+        return Mathf.Clamp(offset/-2f + (Mathf.PerlinNoise(x, y) * offset*2f), 0f, 1f);
+    }
 
 }
 }

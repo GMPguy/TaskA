@@ -130,7 +130,12 @@ public class WorldManager : MonoBehaviour {
         public Texture2D objectSprite;
         public int[] objTra = {0,0,0,0};
         public Vector2 getScale(){ return new Vector2(objTra[0]/32, objTra[1]/32); }
-        public Vector2 getPivot(){ return new Vector2(objTra[2]/32, objTra[3]/32); }
+        public Vector2 getPivot(ref Transform POV){ 
+            return objTra[2]/32 * POV.right + objTra[3]/32 * POV.up; 
+        }
+        public float getZ(Vector3 up, Vector3 pos, float dist){
+            return (dist/2f + Vector3.Dot(up, pos)) / dist;
+        }
         public Texture2D getTexture(){ return objectSprite; }
     }
     // Map objects

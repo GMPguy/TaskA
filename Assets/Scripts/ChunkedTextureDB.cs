@@ -139,8 +139,9 @@ public class ChunkedTextureDB : DrawBase {
         if(t != null && t.cellObject != null){
             tileObject o = t.cellObject;
             if (!objRefs[x, y].gameObject.activeSelf) objRefs[x, y].gameObject.SetActive(true);
-            objRefs[x, y].position = t.getPos() + o.getPivot();
-            objRefs[x, y].position -= Vector3.forward/100f;
+            objRefs[x, y].position = t.getPos() + o.getPivot(ref POV);
+            objRefs[x, y].eulerAngles = POV.eulerAngles;
+            objRefs[x, y].position -= Vector3.forward*o.getZ(-POV.up, objRefs[x, y].position - POV.position, objChunkSize[0]);
             objRefs[x, y].localScale = o.getScale();
             objTexs[x, y].mainTexture = o.getTexture();
         } else if (objRefs[x, y].gameObject.activeSelf) {

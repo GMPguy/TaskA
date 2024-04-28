@@ -5,6 +5,7 @@ using UnityEngine;
 public class PlayerScript : MonoBehaviour {
 
     public Transform MainCamera;
+    public Transform Capsule;
     Camera mcCamera;
     Vector3 cameraOffset;
     float POVscroll = 5f;
@@ -21,8 +22,9 @@ public class PlayerScript : MonoBehaviour {
         if(stun > 0f){
             stun = Mathf.Clamp(stun -= Time.deltaTime, 0f, Mathf.Infinity);
         } else {
-            this.transform.position += new Vector3(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical")) * playerSpeed * Time.deltaTime;
+            this.transform.position += (MainCamera.right * Input.GetAxis("Horizontal") + MainCamera.up * Input.GetAxis("Vertical")) * playerSpeed * Time.deltaTime;
             if(Input.GetMouseButton(1)) cameraOffset -= new Vector3(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"), 0f);
+            if(Input.GetMouseButton(2)) MainCamera.Rotate(Vector3.forward * Input.GetAxis("Mouse X") * 4f);
             if(Input.mouseScrollDelta.y != 0f) POVscroll = Mathf.Clamp(POVscroll - Input.mouseScrollDelta.y, 5f, 100f);
         }
 
@@ -31,6 +33,11 @@ public class PlayerScript : MonoBehaviour {
         setCamPos.z = -10f;
         MainCamera.transform.position = setCamPos;
         mcCamera.orthographicSize = Mathf.Lerp(mcCamera.orthographicSize, POVscroll, Time.deltaTime * 10f);
+
+        // Test capsule rot
+        float Rot = MainCamera.eulerAngles.z;
+        Capsule.eulerAngles = MainCamera.eulerAngles;
+        Capsule.localPosition = MainCamera.up/2f;
         
     }
 }

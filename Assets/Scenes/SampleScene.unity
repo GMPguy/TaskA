@@ -533,6 +533,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MainCamera: {fileID: 519420032}
+  Capsule: {fileID: 1104600140}
   playerSpeed: 10
   stun: 0
 --- !u!1 &409098800
@@ -710,8 +711,8 @@ MonoBehaviour:
     copyTextures: 
     possibleObjects: 00000000
     chanceFO:
-    - 0.5
-    - 2
+    - 0.25
+    - 1.5
   - tileID: 5
     saturationMethod: 1
     tileName: Tundra

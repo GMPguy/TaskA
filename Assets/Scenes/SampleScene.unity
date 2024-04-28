@@ -621,9 +621,9 @@ MonoBehaviour:
     - {fileID: 2800000, guid: 3c80f47b3f83177479c413f290db1ec5, type: 3}
     copyTextures: 
     possibleObjects: 
-    chanceForObjects: 0
+    chanceFO: []
   - tileID: 1
-    saturationMethod: 0
+    saturationMethod: 1
     tileName: Plains
     tileColor:
       serializedVersion: 2
@@ -636,9 +636,9 @@ MonoBehaviour:
     - {fileID: 2800000, guid: c458d24a1acfeac42932ea7603f97726, type: 3}
     copyTextures: 
     possibleObjects: 
-    chanceForObjects: 0
+    chanceFO: []
   - tileID: 2
-    saturationMethod: 0
+    saturationMethod: 1
     tileName: Farmlands
     tileColor:
       serializedVersion: 2
@@ -651,7 +651,7 @@ MonoBehaviour:
     - {fileID: 2800000, guid: 535e8bb00fd72c44688fad588f7459aa, type: 3}
     copyTextures: 
     possibleObjects: 
-    chanceForObjects: 0
+    chanceFO: []
   - tileID: 3
     saturationMethod: 0
     tileName: Moor
@@ -691,7 +691,7 @@ MonoBehaviour:
     - {fileID: 0}
     copyTextures: 00000000010000000200000003000000040000000a0000000b0000000c0000000d0000000e0000001400000015000000160000001700000018000000
     possibleObjects: 
-    chanceForObjects: 0
+    chanceFO: []
   - tileID: 4
     saturationMethod: 0
     tileName: Forest
@@ -709,9 +709,11 @@ MonoBehaviour:
     - {fileID: 2800000, guid: 0fdf224980f6ab9488770a0ba5e5fd5e, type: 3}
     copyTextures: 
     possibleObjects: 00000000
-    chanceForObjects: 0.5
+    chanceFO:
+    - 0.5
+    - 2
   - tileID: 5
-    saturationMethod: 0
+    saturationMethod: 1
     tileName: Tundra
     tileColor:
       serializedVersion: 2
@@ -724,7 +726,7 @@ MonoBehaviour:
     - {fileID: 2800000, guid: 3310f0f10696baf43aabb8b49ce5193c, type: 3}
     copyTextures: 
     possibleObjects: 
-    chanceForObjects: 0
+    chanceFO: []
   - tileID: 6
     saturationMethod: 0
     tileName: Mountains
@@ -741,7 +743,7 @@ MonoBehaviour:
     - {fileID: 2800000, guid: 729808c7e264e2445b10c9ef23172b45, type: 3}
     copyTextures: 
     possibleObjects: 
-    chanceForObjects: 0
+    chanceFO: []
   - tileID: 7
     saturationMethod: 0
     tileName: Snow
@@ -752,7 +754,7 @@ MonoBehaviour:
     - {fileID: 2800000, guid: 6c08b52a9925fec45bccc0f3a6ed573c, type: 3}
     copyTextures: 
     possibleObjects: 
-    chanceForObjects: 0
+    chanceFO: []
   objectsToLoad:
   - objectID: 0
     objectName: Spruce tree
@@ -762,24 +764,45 @@ MonoBehaviour:
   biomesToLoad:
   - biomeID: 0
     biomeName: Snow
+    biomeColor:
+      serializedVersion: 2
+      rgba: 4294967295
     availableGroundTiles: 0100000005000000070000000500000007000000040000000600000007000000
   - biomeID: 0
     biomeName: Mountain
-    availableGroundTiles: 0100000005000000070000000500000007000000050000000600000007000000
+    biomeColor:
+      serializedVersion: 2
+      rgba: 4287072135
+    availableGroundTiles: 010000000500000004000000060000000600000006000000060000000600000006000000060000000700000007000000
   - biomeID: 0
     biomeName: Tundra
-    availableGroundTiles: 01000000030000000400000005000000
+    biomeColor:
+      serializedVersion: 2
+      rgba: 4280571792
+    availableGroundTiles: 010000000300000005000000040000000500000006000000
   - biomeID: 0
     biomeName: Grasslands
+    biomeColor:
+      serializedVersion: 2
+      rgba: 4278235175
     availableGroundTiles: 00000000010000000200000003000000
   - biomeID: 0
     biomeName: Normal
+    biomeColor:
+      serializedVersion: 2
+      rgba: 4282167944
     availableGroundTiles: 0000000001000000020000000300000004000000050000000600000007000000
   - biomeID: 0
     biomeName: Woodlands
+    biomeColor:
+      serializedVersion: 2
+      rgba: 4278214174
     availableGroundTiles: 0000000001000000020000000500000004000000040000000500000004000000
   - biomeID: 0
     biomeName: Desert
+    biomeColor:
+      serializedVersion: 2
+      rgba: 4285256959
     availableGroundTiles: 0000000001000000
 --- !u!4 &417880640
 Transform:
@@ -1849,9 +1872,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   POV: {fileID: 519420032}
-  chunkSize: 32
+  chunkSize: 8
   ss: 32
-  objChunkSize: 8000000010000000
+  objChunkSize: 6000000020000000
 --- !u!1 &1995550464
 GameObject:
   m_ObjectHideFlags: 0

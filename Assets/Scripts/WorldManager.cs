@@ -48,7 +48,7 @@ public class WorldManager : MonoBehaviour {
                 Height = checkWater;
                 ground = loadedTiles[(int)getBiome(new(Pos.x, Pos.y)).x];
                 biomeSaturation = getBiome(new(Pos.x, Pos.y)).y;
-                if(ground.chanceForObjects > 0f) cellObject = checkForObject(this);
+                if(ground.chanceFO.Length > 0 && ground.chanceFO[0] > 0f) cellObject = checkForObject(this);
                 else cellObject = null;
             }
         }
@@ -80,7 +80,7 @@ public class WorldManager : MonoBehaviour {
         public int[] copyTextures;
         public pixelMap acquiredTiles;
         public int[] possibleObjects;
-        public float chanceForObjects;
+        public float[] chanceFO;
     }
 
     public struct pixelMap{
@@ -224,6 +224,7 @@ public class WorldManager : MonoBehaviour {
     public class biomeData{
         public int biomeID;
         public string biomeName;
+        public Color32 biomeColor;
         public int[] availableGroundTiles;
     }
 
@@ -237,13 +238,15 @@ public class WorldManager : MonoBehaviour {
         int sector = (int)(errosionFactor[0] * loadedBiomes.Length-.1f);
         biomeData bd = loadedBiomes[sector];
         int aot =  bd.availableGroundTiles.Length;
-        float partition = 0;
+        float partition = errosionFactor[1] * Mathf.Clamp(getWater(tilePos, 1)*aot*2, 0f, aot-1);
+        float saturation;
         try {
             tileData refTile = loadedTiles[bd.availableGroundTiles[(int)partition]];
             switch(refTile.saturationMethod){
-                default: partition = errosionFactor[1] * Mathf.Clamp(getWater(tilePos, 1)*aot*2, 0f, aot-1); break;
+                case 1: saturation = Mathf.Abs(Mathf.Sin(partition*Mathf.PI))%1f; break; // sinus proximity
+                default: saturation = partition%1f; break; // proximity
             }
-            return new Vector3(bd.availableGroundTiles[(int)partition], partition%1f, sector);
+            return new Vector3(bd.availableGroundTiles[(int)partition], saturation, sector);
         } catch (Exception e) {
             Debug.LogError("Biome progression breached " + sector + " (errosion " + errosionFactor[0] + ") - " + partition + " (errosion " + errosionFactor[1] + ")\n" + e);
             return Vector2.zero;
@@ -251,12 +254,11 @@ public class WorldManager : MonoBehaviour {
         //return Mathf.Lerp(1f, Mathf.Clamp(7f, 0f, getWater(tilePos)*14f), erode((tilePos.x * 3.333f + perlinOffset.y) / biomeSize, (tilePos.y * 3.333f + perlinOffset.x) / biomeSize, 1f) % 1f );
     }
 
-    static float[] objDiv = {10f, 25f};
     public static tileObject checkForObject(Cell target){
         tileData ground = target.ground;
-        int choosen = (int)(erode(target.getPos().y / objDiv[1], target.getPos().x / objDiv[1], objDiv[1]) * ground.possibleObjects.Length-0.1f);
-        float chance = erode(target.getPos().y / objDiv[0], target.getPos().x / objDiv[0], objDiv[1]);
-        if (1f - chance <= ground.chanceForObjects) return loadedObjects[ground.possibleObjects[choosen]];
+        int choosen = (int)(erode(target.getPos().y / ground.chanceFO[1], target.getPos().x / ground.chanceFO[1], 10f) * ground.possibleObjects.Length-0.1f);
+        float chance = erode(target.getPos().y / ground.chanceFO[1], target.getPos().x / ground.chanceFO[1], 10f);
+        if (1f - chance <= ground.chanceFO[0]) return loadedObjects[ground.possibleObjects[choosen]];
         else return null;
     }
 

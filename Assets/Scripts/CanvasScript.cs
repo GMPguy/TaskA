@@ -21,6 +21,7 @@ public class CanvasScript : MonoBehaviour {
     PlayerScript mp;
 
     // Map stuff
+    bool showBiomes = true;
     [SerializeField] Transform MapAnchor;
     [SerializeField] RectTransform MapCoorData;
     Text mcdText;
@@ -51,7 +52,10 @@ public class CanvasScript : MonoBehaviour {
         float[] offsetedBlock = {(mapLoad[0]%TextureSize[0]) - TextureSize[0]/2f, (mapLoad[0]/TextureSize[0]) - TextureSize[1]/2f};
         Color biomeColor = Color.blue;
         Vector2 e = Offset[0] + new Vector2(offsetedBlock[0] * BlocksPerPixel, offsetedBlock[1] * BlocksPerPixel);
-        if(getWater(e) > 0f) biomeColor = loadedTiles[(int)getBiome(e).x].tileColor;
+        if(getWater(e) > 0f) {
+            if(showBiomes) biomeColor = loadedBiomes[(int)getBiome(e).z].biomeColor;
+            else biomeColor = loadedTiles[(int)getBiome(e).x].tileColor;
+        }
         MapTexture.SetPixel(mapLoad[0]%TextureSize[0], mapLoad[0]/TextureSize[0], biomeColor);
         mapLoad[0]++;
     }

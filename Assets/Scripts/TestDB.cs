@@ -24,6 +24,8 @@ public class TestDB : DrawBase {
         loadChunk = new[]{0, MapSize*MapSize};
     }
 
+    public override void updateSettings( renderSetting lol){}
+
     public override void load(int loadID, int lastCall){
         Vector2 diff = loadPos-currPos;
         int x = loadID%MapSize;

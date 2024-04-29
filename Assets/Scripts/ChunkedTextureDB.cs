@@ -7,6 +7,7 @@ using static getStatic.WorldManager;
 
 public class ChunkedTextureDB : DrawBase {
 
+    bool Initialize = false;
     public Transform POV;
     float prevZ = 0f;
     public Transform[,] chunkTransforms, objRefs;
@@ -57,22 +58,28 @@ public class ChunkedTextureDB : DrawBase {
         Destroy(FirstChunk);
         Destroy(firstObject);
 
+        Initialize = true;
+
     }
 
     void Update(){
-        if(Mathf.Abs(POV.position.x-cfoPP[0].x) > objChunkSize[1] || Mathf.Abs(POV.position.y-cfoPP[0].y) > objChunkSize[1]){
-            if(Loaded != null) updateTileObjects(Loaded);
-            cfoPP[0] = new(Mathf.Round(POV.position.x / objChunkSize[1]) * objChunkSize[1], Mathf.Round(POV.position.y / objChunkSize[1]) * objChunkSize[1]);
-        }
+        if(Initialize){
 
-        if(POV.eulerAngles.z != prevZ){
-            prevZ = POV.eulerAngles.z;
-            for (int ry = 0; ry < objChunkSize[0]-1; ry++) for (int rx = 0; rx < objChunkSize[0]-1; rx++) if (updateRots[rx, ry] == 1) {
-                Vector2Int cellOffset = new Vector2Int((int)cfoPP[1].x + rx - objChunkSize[0]/2, (int)cfoPP[1].y + ry - objChunkSize[0]/2);
-                if(cellOffset.x > 0f && cellOffset.x < MapSize-1 && cellOffset.y > 0f && cellOffset.y < MapSize-1){
-                    rotObj(rx, ry, Loaded[cellOffset.x, cellOffset.y]);
+            if(Mathf.Abs(POV.position.x-cfoPP[0].x) > objChunkSize[1] || Mathf.Abs(POV.position.y-cfoPP[0].y) > objChunkSize[1]){
+                if(Loaded != null) updateTileObjects(Loaded);
+                cfoPP[0] = new(Mathf.Round(POV.position.x / objChunkSize[1]) * objChunkSize[1], Mathf.Round(POV.position.y / objChunkSize[1]) * objChunkSize[1]);
+            }
+
+            if(POV.eulerAngles.z != prevZ){
+                prevZ = POV.eulerAngles.z;
+                for (int ry = 0; ry < objChunkSize[0]-1; ry++) for (int rx = 0; rx < objChunkSize[0]-1; rx++) if (updateRots[rx, ry] == 1) {
+                    Vector2Int cellOffset = new Vector2Int((int)cfoPP[1].x + rx - objChunkSize[0]/2, (int)cfoPP[1].y + ry - objChunkSize[0]/2);
+                    if(cellOffset.x > 0f && cellOffset.x < MapSize-1 && cellOffset.y > 0f && cellOffset.y < MapSize-1){
+                        rotObj(rx, ry, Loaded[cellOffset.x, cellOffset.y]);
+                    }
                 }
             }
+
         }
     }
 
@@ -84,6 +91,11 @@ public class ChunkedTextureDB : DrawBase {
                 setObj(sx, sy, targetArray[cellOffset.x, cellOffset.y]);
             }
         }
+    }
+
+    public override void updateSettings(renderSetting currSet){
+        chunkSize = currSet.setChunkSize;
+        objChunkSize = new int[]{currSet.setObjSize, currSet.setObjSize/2};
     }
 
     public override void beginLoad(Vector3 there){
@@ -151,10 +163,11 @@ public class ChunkedTextureDB : DrawBase {
     void setObj(int x, int y, Cell t){
         if(t != null && t.cellObject != null){
             tileObject o = t.cellObject;
+            Vector3 objPos = t.getPos();
             if (!objRefs[x, y].gameObject.activeSelf) objRefs[x, y].gameObject.SetActive(true);
             objRefs[x, y].position = t.getPos() + o.getPivot(ref POV);
             objRefs[x, y].eulerAngles = POV.eulerAngles;
-            objRefs[x, y].position -= Vector3.forward*o.getZ(-POV.up, objRefs[x, y].position - POV.position, objChunkSize[0]);
+            objRefs[x, y].position -= Vector3.forward*o.getZ(-POV.up, objPos - POV.position, objChunkSize[0]);
             objRefs[x, y].localScale = o.getScale();
             objTexs[x, y].mainTexture = o.getTexture();
             updateRots[x, y] = 1;
@@ -166,9 +179,10 @@ public class ChunkedTextureDB : DrawBase {
 
     void rotObj(int x, int y, Cell t){
         tileObject o = t.cellObject;
+        Vector3 objPos = t.getPos();
         objRefs[x, y].position = t.getPos() + o.getPivot(ref POV);
         objRefs[x, y].eulerAngles = POV.eulerAngles;
-        objRefs[x, y].position -= Vector3.forward*o.getZ(-POV.up, objRefs[x, y].position - POV.position, objChunkSize[0]);
+        objRefs[x, y].position -= Vector3.forward*o.getZ(-POV.up, objPos - POV.position, objChunkSize[0]);
     }
 
     void setChunk(int[] cc, int[] gc){

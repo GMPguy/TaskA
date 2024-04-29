@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using getStatic;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using static getStatic.WorldManager;
@@ -56,6 +57,8 @@ public class TextureDB : DrawBase {
             }
         }
     }
+
+    public override void updateSettings( renderSetting lol ){}
 
     void setTile(Cell target){
         //if(!target.isWater) StampColor(target.getPos(), mapTextures[currMap], biomeColors[target.biome]);

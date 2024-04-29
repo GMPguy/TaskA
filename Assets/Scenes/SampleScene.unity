@@ -602,6 +602,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4716805a5dab3b489929b5ce148e57f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Initialized: 0
+  currRenderSetting: 0
+  prevCRS: 0
+  renderSettings:
+  - settingName: 
+    setMapSize: 160
+    setChunkSize: 8
+    setObjSize: 96
+    maxCamDist: 0
   Seed: 999999
   RandomGeneration: 0
   drawingMechanism: {fileID: 1857958394}
@@ -612,7 +621,7 @@ MonoBehaviour:
     tileName: Beach sand
     tileColor:
       serializedVersion: 2
-      rgba: 4283923091
+      rgba: 4288865791
     tileTextures:
     - {fileID: 2800000, guid: 557ffd3d2aac1ea47ad4046ec8db39d2, type: 3}
     - {fileID: 2800000, guid: bcef4c3d76b36504aabcd2e74bdf9448, type: 3}
@@ -625,25 +634,108 @@ MonoBehaviour:
     chanceFO: []
   - tileID: 1
     saturationMethod: 1
-    tileName: Plains
+    tileName: Sand
     tileColor:
       serializedVersion: 2
-      rgba: 4282295929
+      rgba: 4284928511
     tileTextures:
-    - {fileID: 2800000, guid: 76b1866d418dca647a5c08bde5175d1e, type: 3}
-    - {fileID: 2800000, guid: 950bf148915e4944f8d2d3439e18dad2, type: 3}
-    - {fileID: 2800000, guid: 273bf84e64539a94696792bccc67956a, type: 3}
-    - {fileID: 2800000, guid: 6ddf773eec6109c4db7be7395ff9aae3, type: 3}
-    - {fileID: 2800000, guid: c458d24a1acfeac42932ea7603f97726, type: 3}
+    - {fileID: 2800000, guid: 3c80f47b3f83177479c413f290db1ec5, type: 3}
+    - {fileID: 2800000, guid: 7f51572fc769b074aa9eeabb6dfc5ba6, type: 3}
+    - {fileID: 2800000, guid: 2397bcf54f77fa84e946ceaf027dd803, type: 3}
+    - {fileID: 2800000, guid: bd3efe67364bbe04e95000831d7e15b7, type: 3}
+    - {fileID: 2800000, guid: bcef4c3d76b36504aabcd2e74bdf9448, type: 3}
+    - {fileID: 2800000, guid: 557ffd3d2aac1ea47ad4046ec8db39d2, type: 3}
     copyTextures: 
     possibleObjects: 
     chanceFO: []
   - tileID: 2
+    saturationMethod: 0
+    tileName: Canyon
+    tileColor:
+      serializedVersion: 2
+      rgba: 4278229759
+    tileTextures:
+    - {fileID: 2800000, guid: 630f9bcb4bd78d448be3554db9072a9a, type: 3}
+    - {fileID: 2800000, guid: 3e9b6760308a8c64da439d5429b7e3a6, type: 3}
+    - {fileID: 2800000, guid: 1274a93529c17af418d4476b3d9b2c38, type: 3}
+    - {fileID: 2800000, guid: 2ccf955c76674b14fbfc4092bf8b55db, type: 3}
+    - {fileID: 2800000, guid: 19609f078bfe7104499c9aba129ff554, type: 3}
+    - {fileID: 2800000, guid: 083c719914da3be42b72833246aff6dd, type: 3}
+    - {fileID: 2800000, guid: 04003460b2ccd7a43a947d7906626298, type: 3}
+    - {fileID: 2800000, guid: fa1bb0307b0cdb1408c4bc81b583545c, type: 3}
+    - {fileID: 2800000, guid: baa85ecf29d595c468ce4c92254d2d8a, type: 3}
+    - {fileID: 2800000, guid: 6e45ef0741879b14285ebcccf506b428, type: 3}
+    copyTextures: 
+    possibleObjects: 
+    chanceFO: []
+  - tileID: 3
+    saturationMethod: 0
+    tileName: Jungle
+    tileColor:
+      serializedVersion: 2
+      rgba: 4278879232
+    tileTextures:
+    - {fileID: 2800000, guid: 8d16ea97658147c4298b9e8f3d9f0ee1, type: 3}
+    - {fileID: 2800000, guid: 63d11c1b0f0006b4c998e0975039bc72, type: 3}
+    - {fileID: 2800000, guid: 71e36839a9a2822408a9da891b2cb290, type: 3}
+    - {fileID: 2800000, guid: da83d3361625eea4ea895043f5fc5c7f, type: 3}
+    - {fileID: 2800000, guid: 8bca23bbed8dd984a84521cdf142464e, type: 3}
+    - {fileID: 2800000, guid: 21ba174c1608d374ba50cf6d10d57a81, type: 3}
+    copyTextures: 
+    possibleObjects: 
+    chanceFO: []
+  - tileID: 4
     saturationMethod: 1
+    tileName: Swamp ground
+    tileColor:
+      serializedVersion: 2
+      rgba: 4283011962
+    tileTextures:
+    - {fileID: 2800000, guid: 535e8bb00fd72c44688fad588f7459aa, type: 3}
+    - {fileID: 2800000, guid: 1ac19901ab643ce47af1d2470fea70f8, type: 3}
+    - {fileID: 2800000, guid: c458d24a1acfeac42932ea7603f97726, type: 3}
+    copyTextures: 
+    possibleObjects: 
+    chanceFO: []
+  - tileID: 5
+    saturationMethod: 1
+    tileName: Swamp water
+    tileColor:
+      serializedVersion: 2
+      rgba: 4282745985
+    tileTextures:
+    - {fileID: 2800000, guid: 5cffd51b13447a949b7b784b38be2acc, type: 3}
+    - {fileID: 2800000, guid: 210bf02944fdfc244a40cddbe1e94218, type: 3}
+    - {fileID: 2800000, guid: fca33039ec96a804ca8d85adbf2b97d4, type: 3}
+    copyTextures: 
+    possibleObjects: 
+    chanceFO: []
+  - tileID: 6
+    saturationMethod: 0
+    tileName: Moor
+    tileColor:
+      serializedVersion: 2
+      rgba: 4293562367
+    tileTextures:
+    - {fileID: 2800000, guid: 738df364fe19ef240bd640b73bc8be61, type: 3}
+    - {fileID: 2800000, guid: 875c0862406ab6c4b873298255268063, type: 3}
+    - {fileID: 2800000, guid: b5bd3d45375e48547af1696ea697f9e2, type: 3}
+    - {fileID: 2800000, guid: 14e7929bb4f889d428b007eedfffcba7, type: 3}
+    - {fileID: 2800000, guid: 5d43a86d1963e9841ae2f23ad84788b3, type: 3}
+    - {fileID: 2800000, guid: 3cd24c640e9f85b4cb56277cfc820dbd, type: 3}
+    - {fileID: 2800000, guid: 389a7f346ef691d41b0ab1fea03ecdbe, type: 3}
+    - {fileID: 2800000, guid: b0f28cf239e0e904fb06f3a2f8bade8e, type: 3}
+    - {fileID: 2800000, guid: 5f221278e7936fa4f9fda325053cad12, type: 3}
+    - {fileID: 2800000, guid: aa080b2bffa9bdc4bba6736375c07a13, type: 3}
+    copyTextures: 
+    possibleObjects: 
+    chanceFO: []
+  - tileID: 7
+    saturationMethod: 0
     tileName: Farmlands
     tileColor:
       serializedVersion: 2
-      rgba: 4280988847
+      rgba: 4278255583
     tileTextures:
     - {fileID: 2800000, guid: 21dba9be97579bc4b8d472446deca8c8, type: 3}
     - {fileID: 2800000, guid: ccbddb94b99a6a2428e10d14ac4f716c, type: 3}
@@ -653,52 +745,12 @@ MonoBehaviour:
     copyTextures: 
     possibleObjects: 
     chanceFO: []
-  - tileID: 3
-    saturationMethod: 0
-    tileName: Moor
-    tileColor:
-      serializedVersion: 2
-      rgba: 4281467075
-    tileTextures:
-    - {fileID: 2800000, guid: ac231cc54cda1514ba2a9a93ddf01b2f, type: 3}
-    - {fileID: 2800000, guid: 50d4fc9990f165d4e8d85187ae022928, type: 3}
-    - {fileID: 2800000, guid: a63f00926928e364ead0172822d0b901, type: 3}
-    - {fileID: 2800000, guid: a5c7fba2841873e4dbb6ba6386f27139, type: 3}
-    - {fileID: 2800000, guid: 25034b490486a294d866d22f4947d572, type: 3}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 2800000, guid: ba92b773f4e37cb4ba6bd4f4f8da5ad3, type: 3}
-    - {fileID: 2800000, guid: 7d732827883ad8c4497fb562e541beef, type: 3}
-    - {fileID: 2800000, guid: e66bf94052176b1419d613cae5e30626, type: 3}
-    - {fileID: 2800000, guid: de64ee0224db6fb4c9a93392ffc24f14, type: 3}
-    - {fileID: 2800000, guid: 1335859d6f38fe64a9f1227430b2fe22, type: 3}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 2800000, guid: 72c0e8afc60953e46bc134611e879cd9, type: 3}
-    - {fileID: 2800000, guid: b0ddde7fad25bdd479fc19f629b951c1, type: 3}
-    - {fileID: 2800000, guid: b592a5fbfe7fa3d4db781c4701903f93, type: 3}
-    - {fileID: 2800000, guid: bd7b57b9565d0774d8893f19b03fab57, type: 3}
-    - {fileID: 2800000, guid: a5b398dd28e09454aaf790427d84f43d, type: 3}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    copyTextures: 00000000010000000200000003000000040000000a0000000b0000000c0000000d0000000e0000001400000015000000160000001700000018000000
-    possibleObjects: 
-    chanceFO: []
-  - tileID: 4
+  - tileID: 8
     saturationMethod: 0
     tileName: Forest
     tileColor:
       serializedVersion: 2
-      rgba: 4279594752
+      rgba: 4278225550
     tileTextures:
     - {fileID: 2800000, guid: 8e31d19a401e63149993b293e336dda1, type: 3}
     - {fileID: 2800000, guid: 2c65fac06411273488938e9dadaea4b3, type: 3}
@@ -709,16 +761,29 @@ MonoBehaviour:
     - {fileID: 2800000, guid: a561f28adb4cebf4f8fe269e1f99a04b, type: 3}
     - {fileID: 2800000, guid: 0fdf224980f6ab9488770a0ba5e5fd5e, type: 3}
     copyTextures: 
-    possibleObjects: 0000000001000000020000000300000004000000
-    chanceFO:
-    - 0.4
-    - 1.1
-  - tileID: 5
+    possibleObjects: 
+    chanceFO: []
+  - tileID: 9
     saturationMethod: 1
+    tileName: Plains
+    tileColor:
+      serializedVersion: 2
+      rgba: 4278255428
+    tileTextures:
+    - {fileID: 2800000, guid: 76b1866d418dca647a5c08bde5175d1e, type: 3}
+    - {fileID: 2800000, guid: 950bf148915e4944f8d2d3439e18dad2, type: 3}
+    - {fileID: 2800000, guid: 273bf84e64539a94696792bccc67956a, type: 3}
+    - {fileID: 2800000, guid: 6ddf773eec6109c4db7be7395ff9aae3, type: 3}
+    - {fileID: 2800000, guid: c458d24a1acfeac42932ea7603f97726, type: 3}
+    copyTextures: 
+    possibleObjects: 
+    chanceFO: []
+  - tileID: 10
+    saturationMethod: 0
     tileName: Tundra
     tileColor:
       serializedVersion: 2
-      rgba: 4281818749
+      rgba: 4278216703
     tileTextures:
     - {fileID: 2800000, guid: 6c8a79f5d7845524885668cb82b9c91c, type: 3}
     - {fileID: 2800000, guid: 12483c5769936ea49a7c846fb048aafc, type: 3}
@@ -728,12 +793,41 @@ MonoBehaviour:
     copyTextures: 
     possibleObjects: 
     chanceFO: []
-  - tileID: 6
+  - tileID: 11
     saturationMethod: 0
-    tileName: Mountains
+    tileName: Winter forest
     tileColor:
       serializedVersion: 2
-      rgba: 4285953654
+      rgba: 4284059136
+    tileTextures:
+    - {fileID: 2800000, guid: 6de73abf546d0074187ada504dcb7182, type: 3}
+    - {fileID: 2800000, guid: 391884629b4eb6140b1247042caca14c, type: 3}
+    - {fileID: 2800000, guid: fcd0e3bb33add464bbe5c558b21ab335, type: 3}
+    - {fileID: 2800000, guid: 7eb3596c88aec5f44afef3fb76a8e509, type: 3}
+    - {fileID: 2800000, guid: 2d2cbc90add3bd84aa1f3bff4c70610a, type: 3}
+    - {fileID: 2800000, guid: 87b7e3b1a5887b445950f56cc1fa1da7, type: 3}
+    - {fileID: 2800000, guid: 6f22597fc54c4a341b170a5842829eb5, type: 3}
+    - {fileID: 2800000, guid: 86bf6c9a6c84e4e4d95a15be371c84c2, type: 3}
+    copyTextures: 
+    possibleObjects: 
+    chanceFO: []
+  - tileID: 12
+    saturationMethod: 0
+    tileName: Snow
+    tileColor:
+      serializedVersion: 2
+      rgba: 4294967295
+    tileTextures:
+    - {fileID: 2800000, guid: 6c08b52a9925fec45bccc0f3a6ed573c, type: 3}
+    copyTextures: 
+    possibleObjects: 
+    chanceFO: []
+  - tileID: 13
+    saturationMethod: 0
+    tileName: Mountain
+    tileColor:
+      serializedVersion: 2
+      rgba: 4286611584
     tileTextures:
     - {fileID: 2800000, guid: cc9407e1472c6cd429d6764a23c6144b, type: 3}
     - {fileID: 2800000, guid: 7bbe1a472b7f63a43bfbffb3f558729b, type: 3}
@@ -742,17 +836,6 @@ MonoBehaviour:
     - {fileID: 2800000, guid: 51d787ea4c22f0549bcd1ee1718f7f3b, type: 3}
     - {fileID: 2800000, guid: 6d78c5961c552ce4d960eadf49db6939, type: 3}
     - {fileID: 2800000, guid: 729808c7e264e2445b10c9ef23172b45, type: 3}
-    copyTextures: 
-    possibleObjects: 
-    chanceFO: []
-  - tileID: 7
-    saturationMethod: 0
-    tileName: Snow
-    tileColor:
-      serializedVersion: 2
-      rgba: 4294967295
-    tileTextures:
-    - {fileID: 2800000, guid: 6c08b52a9925fec45bccc0f3a6ed573c, type: 3}
     copyTextures: 
     possibleObjects: 
     chanceFO: []
@@ -780,47 +863,65 @@ MonoBehaviour:
   Stats: {fileID: 4270176}
   biomesToLoad:
   - biomeID: 0
+    biomeName: Desert
+    biomeColor:
+      serializedVersion: 2
+      rgba: 4287485695
+    availableGroundTiles: 000000000100000002000000
+  - biomeID: 1
+    biomeName: Jungle
+    biomeColor:
+      serializedVersion: 2
+      rgba: 4278291456
+    availableGroundTiles: 000000000300000003000000
+  - biomeID: 2
+    biomeName: Swamp
+    biomeColor:
+      serializedVersion: 2
+      rgba: 4284861606
+    availableGroundTiles: 0400000005000000040000000500000004000000
+  - biomeID: 3
+    biomeName: Farmlands
+    biomeColor:
+      serializedVersion: 2
+      rgba: 4282440128
+    availableGroundTiles: 000000000600000006000000060000000700000007000000
+  - biomeID: 4
+    biomeName: Forest
+    biomeColor:
+      serializedVersion: 2
+      rgba: 4278220865
+    availableGroundTiles: 00000000080000000800000008000000
+  - biomeID: 5
+    biomeName: Grasslands
+    biomeColor:
+      serializedVersion: 2
+      rgba: 4278255462
+    availableGroundTiles: 0000000006000000090000000600000009000000
+  - biomeID: 6
+    biomeName: Tundra
+    biomeColor:
+      serializedVersion: 2
+      rgba: 4278215076
+    availableGroundTiles: 0a0000000a0000000c0000000a000000
+  - biomeID: 7
+    biomeName: Winter forest
+    biomeColor:
+      serializedVersion: 2
+      rgba: 4283603456
+    availableGroundTiles: 0b0000000c0000000b0000000c000000
+  - biomeID: 8
+    biomeName: Mountains
+    biomeColor:
+      serializedVersion: 2
+      rgba: 4284966759
+    availableGroundTiles: 0d000000
+  - biomeID: 9
     biomeName: Snow
     biomeColor:
       serializedVersion: 2
       rgba: 4294967295
-    availableGroundTiles: 0100000005000000070000000500000007000000040000000600000007000000
-  - biomeID: 0
-    biomeName: Mountain
-    biomeColor:
-      serializedVersion: 2
-      rgba: 4287072135
-    availableGroundTiles: 010000000500000004000000060000000600000006000000060000000600000006000000060000000700000007000000
-  - biomeID: 0
-    biomeName: Tundra
-    biomeColor:
-      serializedVersion: 2
-      rgba: 4280571792
-    availableGroundTiles: 010000000300000005000000040000000500000006000000
-  - biomeID: 0
-    biomeName: Grasslands
-    biomeColor:
-      serializedVersion: 2
-      rgba: 4278235175
-    availableGroundTiles: 00000000010000000200000003000000
-  - biomeID: 0
-    biomeName: Normal
-    biomeColor:
-      serializedVersion: 2
-      rgba: 4282167944
-    availableGroundTiles: 0000000001000000020000000300000004000000050000000600000007000000
-  - biomeID: 0
-    biomeName: Woodlands
-    biomeColor:
-      serializedVersion: 2
-      rgba: 4278214174
-    availableGroundTiles: 0000000001000000020000000500000004000000040000000500000004000000
-  - biomeID: 0
-    biomeName: Desert
-    biomeColor:
-      serializedVersion: 2
-      rgba: 4285256959
-    availableGroundTiles: 0000000001000000
+    availableGroundTiles: 0c0000000c0000000b000000
 --- !u!4 &417880640
 Transform:
   m_ObjectHideFlags: 0

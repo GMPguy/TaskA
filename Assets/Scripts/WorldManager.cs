@@ -3,14 +3,23 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Loading;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 using Random=UnityEngine.Random;
 using UnityEngine.UI;
 using static getStatic.WorldManager;
-using UnityEditor.Experimental.GraphView;
 
 namespace getStatic {
 public class WorldManager : MonoBehaviour {
+
+    public bool Initialized = false;
+
+    // Graphics settings
+    public int currRenderSetting, prevCRS;
+    public renderSetting[] renderSettings;
+    [System.Serializable]
+    public struct renderSetting{
+        public string settingName;
+        public int setMapSize, setChunkSize, setObjSize, maxCamDist;
+    };
     
     // Randomizer
     public int Seed = 999999;
@@ -116,7 +125,7 @@ public class WorldManager : MonoBehaviour {
 
     public static Color32[] getTM(int biomeID, float mapLerp){
         pixelMap got = loadedTiles[biomeID].acquiredTiles;
-        return got.acquiredTiles[got.properTiles[(int)(mapLerp * got.acquiredTiles.Length)]].Data;
+        return got.acquiredTiles[got.properTiles[(int)(mapLerp * (got.acquiredTiles.Length-0.1f))]].Data;
     }
     // Map tiles sprites
 
@@ -140,7 +149,7 @@ public class WorldManager : MonoBehaviour {
     }
     // Map objects
 
-    void Start(){
+    void Initialize(){
 
         loadedTiles = new tileData[tilesToLoad.Length];
         tilesToLoad.CopyTo(loadedTiles, 0);
@@ -159,11 +168,27 @@ public class WorldManager : MonoBehaviour {
         currPos = Vector3.one*9999f;
         drawingMechanism.initializeSystem();
         drawingMechanism.beginLoad(Vector3.zero);
+
+        Initialized = true;
+
     }
 
     void Update(){
-        checkForChunkUpdate();
-        Stats.text = statsUpdate();
+
+        if(Initialized){
+            if(prevCRS != currRenderSetting){
+                prevCRS = currRenderSetting;
+                MapSize = renderSettings[prevCRS].setMapSize;
+                drawingMechanism.updateSettings( renderSettings[prevCRS]);
+            }
+
+            checkForChunkUpdate();
+            Stats.text = statsUpdate();
+        } else {
+            if (Input.GetKeyDown(KeyCode.Space)) {
+                Initialize();
+            }
+        }
     }
 
     float psLerp = 0f;
@@ -203,7 +228,7 @@ public class WorldManager : MonoBehaviour {
     // World generation values
     static float[] islandMargin = {1f, -1f, 200};
     static float islandSize = 20;
-    static float biomeSize = 320;
+    static float biomeSize = 160;
     public static float getHeight(Vector2 tilePos){
         return Mathf.Pow( erode((tilePos.x * 0.333f + perlinOffset.x) / islandSize, (tilePos.y * 0.333f + perlinOffset.y) / islandSize, 5f) , 2f );
     }
@@ -238,8 +263,8 @@ public class WorldManager : MonoBehaviour {
 
     public static Vector3 getBiome(Vector2 tilePos){
         float[] errosionFactor = {
-            erode((tilePos.x + perlinOffset.x) / (biomeSize*10f), (tilePos.y + perlinOffset.y) / (biomeSize*10f), 15f),
-            erode((tilePos.x + perlinOffset.y) / biomeSize, (tilePos.y + perlinOffset.x) / biomeSize, 15f)};
+            erodeSaturated((tilePos.x + perlinOffset.x) / (biomeSize*10f), (tilePos.y + perlinOffset.y) / (biomeSize*10f), 10f, 1f),
+            erode((tilePos.x + perlinOffset.y) / biomeSize, (tilePos.y + perlinOffset.x) / biomeSize, 30f)};
         int sector = (int)(errosionFactor[0] * loadedBiomes.Length-.1f);
         biomeData bd = loadedBiomes[sector];
         int aot =  bd.availableGroundTiles.Length;
@@ -248,12 +273,12 @@ public class WorldManager : MonoBehaviour {
         try {
             tileData refTile = loadedTiles[bd.availableGroundTiles[(int)partition]];
             switch(refTile.saturationMethod){
-                case 1: saturation = Mathf.Abs(Mathf.Sin(partition*Mathf.PI))%1f; break; // sinus proximity
+                case 1: saturation = Mathf.Abs(Mathf.Sin((partition%1f)*Mathf.PI)); break; // sinus proximity
                 default: saturation = partition%1f; break; // proximity
             }
             return new Vector3(bd.availableGroundTiles[(int)partition], saturation, sector);
         } catch (Exception e) {
-            Debug.LogError("Biome progression breached " + sector + " (errosion " + errosionFactor[0] + ") - " + partition + " (errosion " + errosionFactor[1] + ")\n" + e);
+            Debug.LogError("Biome progression breached " + sector + " (errosion " + errosionFactor[0] + ") - " + partition + "/" + aot + " (errosion " + errosionFactor[1] + ")\n" + e);
             return Vector2.zero;
         }
         //return Mathf.Lerp(1f, Mathf.Clamp(7f, 0f, getWater(tilePos)*14f), erode((tilePos.x * 3.333f + perlinOffset.y) / biomeSize, (tilePos.y * 3.333f + perlinOffset.x) / biomeSize, 1f) % 1f );
@@ -296,6 +321,13 @@ public class WorldManager : MonoBehaviour {
     public static float erodeTectonics(float x, float y, float power, float[] shift){
         Vector2 shi = tectonic(x, y, shift);
         return erode(shi.x, shi.y, power);
+    }
+
+    public static float erodeSaturated(float x, float y, float p = 10f, float offset = 1f){
+        float normal = Mathf.Clamp(offset/-2f + (Mathf.PerlinNoise(x, y) * offset*2f), 0f, 1f);
+        float eroded = Mathf.Clamp(offset/-2f + (Mathf.PerlinNoise(x*p, y*p) * offset*2f), 0f, 1f);
+        float mask = Mathf.PerlinNoise(y / 3f, x / 3f);
+        return Mathf.Clamp( Mathf.Lerp(normal, eroded, mask/2f) , 0f, 1f );
     }
     // World generation values
 

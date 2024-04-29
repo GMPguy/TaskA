@@ -1,10 +1,19 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using getStatic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using static getStatic.WorldManager;
 
 public class CanvasScript : MonoBehaviour {
+
+    // References
+    public Transform MainPlayer;
+    public Transform LoadingScreen;
+    PlayerScript mp;
+    public WorldManager WM;
     
     void Start(){
        GenerateMapTexture();
@@ -13,12 +22,59 @@ public class CanvasScript : MonoBehaviour {
     }
 
     void Update(){
-        MapUpdate();
+        Options(!Initialized);
+        if(Initialized) MapUpdate();
     }
 
-    // References
-    public Transform MainPlayer;
-    PlayerScript mp;
+    // Options
+    public Transform OptionsWindow;
+    public TextMeshProUGUI[] OptionsTextes;
+
+    void Options(bool show){
+        if(show){
+            for(int st = 0; st < OptionsTextes.Length; st++){
+                string setT = "";
+                switch(OptionsTextes[st].name){
+                    case "RenderDistance": setT = "Render distance: " + WM.renderSettings[WM.currRenderSetting].settingName; break;
+                }
+                OptionsTextes[st].text = setT;
+            }
+
+            OptionsWindow.localScale = Vector3.one;
+            mp.stun = 1f;
+        } else {
+            OptionsWindow.localScale = Vector3.zero;
+        }
+    }
+
+    public void optionButton(string buttType){
+        switch(buttType){
+            case "RenderDistance":
+                WM.currRenderSetting = (WM.currRenderSetting+1)%5;
+                break;
+            case "Spawn":
+                WM.Initialize();
+                break;
+        }
+    }
+
+    public void changeX(string Input){
+        try{ worldSize[0] = float.Parse(Input); } 
+        catch (Exception e){ worldSize[0] = 20000f; print(e); }
+    }
+
+    public void changeY(string Input){
+        try{ worldSize[1] = float.Parse(Input); } 
+        catch (Exception e){ worldSize[1] = 20000f; print(e); }
+    }
+
+    public void changeSeed(string Input){
+        try{ 
+            if(Input.Length > 9) WM.Seed = int.Parse(Input[..9]);
+            else WM.Seed = int.Parse(Input);
+        } catch (Exception e){ WM.Seed = 999999; print(e); }
+    }
+    // Options
 
     // Map stuff
     bool showBiomes = true;
@@ -61,7 +117,7 @@ public class CanvasScript : MonoBehaviour {
     }
 
     string mcdString(Vector2 tile){
-        return "x" + tile.x + "\ny" + tile.y;
+        return "Coordinates: (x" + tile.x + ", y" + tile.y + ")\n\nLMB - move map\nScroll - zoom in/out map\nRMB - teleport to this point";
     }
 
     void MapUpdate(){
@@ -86,6 +142,7 @@ public class CanvasScript : MonoBehaviour {
                 Offset[0] = pointedPos;
                 MainPlayer.position = pointedPos;
                 GenerateMapTexture();
+                LoadingScreen.localScale = Vector3.zero;
             }
 
             if(Input.mouseScrollDelta.y != 0f)  shiftZoom = new[]{Mathf.Clamp(shiftZoom[0] - Input.mouseScrollDelta.y, 1f, 100f), 1f};

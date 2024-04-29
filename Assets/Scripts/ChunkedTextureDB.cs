@@ -95,7 +95,7 @@ public class ChunkedTextureDB : DrawBase {
 
     public override void updateSettings(renderSetting currSet){
         chunkSize = currSet.setChunkSize;
-        objChunkSize = new int[]{currSet.setObjSize, currSet.setObjSize/2};
+        objChunkSize = new int[]{currSet.setObjSize, currSet.setObjSize/4};
     }
 
     public override void beginLoad(Vector3 there){

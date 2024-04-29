@@ -35,7 +35,14 @@ public class CanvasScript : MonoBehaviour {
             for(int st = 0; st < OptionsTextes.Length; st++){
                 string setT = "";
                 switch(OptionsTextes[st].name){
-                    case "RenderDistance": setT = "Render distance: " + WM.renderSettings[WM.currRenderSetting].settingName; break;
+                    case "RenderDistance": 
+                        setT = "Render distance: " + WM.renderSettings[WM.currRenderSetting].settingName; 
+                        OptionsTextes[st].color = WM.renderSettings[WM.currRenderSetting].warningColor;
+                        break;
+                    case "InfiniteWorld":
+                        if(worldSize[2] > 0.5f) setT = "Infinite world: true";
+                        else setT = "Infinite world: false";
+                        break;
                 }
                 OptionsTextes[st].text = setT;
             }
@@ -54,6 +61,10 @@ public class CanvasScript : MonoBehaviour {
                 break;
             case "Spawn":
                 WM.Initialize();
+                mapEnable = true;
+                break;
+            case "InfiniteWorld":
+                worldSize[2] = (worldSize[2]+1f)%2f;
                 break;
         }
     }
@@ -69,10 +80,25 @@ public class CanvasScript : MonoBehaviour {
     }
 
     public void changeSeed(string Input){
-        try{ 
-            if(Input.Length > 9) WM.Seed = int.Parse(Input[..9]);
-            else WM.Seed = int.Parse(Input);
-        } catch (Exception e){ WM.Seed = 999999; print(e); }
+        if(Input.Length > 9) WM.Seed = int.Parse(Input[..9]);
+        else WM.Seed = int.Parse(Input);
+    }
+
+    public void changeBiome(string Input){
+        biomeSize[0] = float.Parse(Input);
+    }
+
+    public void changeRiverDensity(string Input){
+        riverDensity = float.Parse(Input);
+    }
+
+    public void changeContinents(string Input){
+        continentMargin[2] = float.Parse(Input);
+    }
+
+    public void changeRiverSize(Slider slider){
+        riverMargin[0] = Mathf.Lerp(0.5f, 0.3f, slider.value);
+        riverMargin[2] = 0.5f - riverMargin[0];
     }
     // Options
 
@@ -101,7 +127,7 @@ public class CanvasScript : MonoBehaviour {
             MapTexture = nT;
             Map.material.SetTexture("_MainTex", nT);
         }
-        mapLoad = new[]{0, TextureSize[0]*TextureSize[1], 100000};
+        mapLoad = new[]{0, TextureSize[0]*TextureSize[1], 40000};
     }
 
     void MapRender(){
@@ -109,8 +135,8 @@ public class CanvasScript : MonoBehaviour {
         Color biomeColor = Color.blue;
         Vector2 e = Offset[0] + new Vector2(offsetedBlock[0] * BlocksPerPixel, offsetedBlock[1] * BlocksPerPixel);
         if(getWater(e) > 0f) {
-            if(showBiomes) biomeColor = loadedBiomes[(int)getBiome(e).z].biomeColor;
-            else biomeColor = loadedTiles[(int)getBiome(e).x].tileColor;
+            if(showBiomes) biomeColor = loadedBiomes[(int)getBiomeQuick(e)].biomeColor;
+            else biomeColor = loadedTiles[(int)getBiomeQuick(e)].tileColor;
         }
         MapTexture.SetPixel(mapLoad[0]%TextureSize[0], mapLoad[0]/TextureSize[0], biomeColor);
         mapLoad[0]++;
@@ -145,7 +171,7 @@ public class CanvasScript : MonoBehaviour {
                 LoadingScreen.localScale = Vector3.zero;
             }
 
-            if(Input.mouseScrollDelta.y != 0f)  shiftZoom = new[]{Mathf.Clamp(shiftZoom[0] - Input.mouseScrollDelta.y, 1f, 100f), 1f};
+            if(Input.mouseScrollDelta.y != 0f)  shiftZoom = new[]{Mathf.Clamp(shiftZoom[0] - Input.mouseScrollDelta.y, 1f, Mathf.Infinity), 1f};
             if(shiftZoom[0] != BlocksPerPixel){
                 Map.GetComponent<RectTransform>().localScale = Vector2.one * (BlocksPerPixel / shiftZoom[0]);
                 shiftZoom[1] -= Time.deltaTime;

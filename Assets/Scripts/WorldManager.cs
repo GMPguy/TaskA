@@ -19,6 +19,7 @@ public class WorldManager : MonoBehaviour {
     public struct renderSetting{
         public string settingName;
         public int setMapSize, setChunkSize, setObjSize, maxCamDist, pushDist;
+        public Color warningColor;
     };
     
     // Randomizer
@@ -124,13 +125,8 @@ public class WorldManager : MonoBehaviour {
     }
 
     public static Color32[] getTM(int biomeID, float mapLerp){
-        try {
-            pixelMap got = loadedTiles[biomeID].acquiredTiles;
-            return got.acquiredTiles[got.properTiles[(int)(mapLerp * (got.acquiredTiles.Length-0.1f))]].Data;
-        } catch (Exception e){
-            Debug.LogError("An error has occured when accesing tile map; maplerp " + mapLerp + ", biomeID " + biomeID + "\n" + e);
-            return null;
-        }
+        pixelMap got = loadedTiles[biomeID].acquiredTiles;
+        return got.acquiredTiles[got.properTiles[(int)(mapLerp * (got.acquiredTiles.Length-0.1f))]].Data;
     }
     // Map tiles sprites
 
@@ -233,18 +229,18 @@ public class WorldManager : MonoBehaviour {
     // World generation values
     static float[] islandMargin = {1f, -1f, 200};
     static float islandSize = 20;
-    static float[] biomeSize = {4000, 20f}; // biome size, biome diversity size
+    public static float[] biomeSize = {4000, 20f, 0f}; // biome size, biome diversity size, is world infinited
     public static float getHeight(Vector2 tilePos){
         return Mathf.Pow( erode((tilePos.x * 0.333f + perlinOffset.x) / islandSize, (tilePos.y * 0.333f + perlinOffset.y) / islandSize, 5f) , 2f );
     }
 
-    static float[] continentMargin = {-20f, 20f, 5f};
-    public static float[] worldSize = {40000f, 40000f, 0.5f};
+    public static float[] continentMargin = {-20f, 20f, 5f};
+    public static float[] worldSize = {40000f, 40000f, 0f};
     public static float getContinent(Vector2 tilePos){
         float density = worldSize[1]/continentMargin[2];
         Vector2 st = new(tilePos.x + perlinOffset.x, tilePos.y + perlinOffset.y);
         float land = erode((st.x-worldSize[0]) / density, (st.y-worldSize[1]) / density, 5f);//, new[]{0f, density/4f});
-        if(Mathf.Abs(tilePos.x) > worldSize[0]/2f || Mathf.Abs(tilePos.y) > worldSize[1]/2f) land = 0f;
+        if(Mathf.Abs(tilePos.x) > worldSize[0]/2f || Mathf.Abs(tilePos.y) > worldSize[1]/2f) land *= worldSize[2];
         return Mathf.Lerp( continentMargin[0], continentMargin[1], land);
     }
 
@@ -252,7 +248,7 @@ public class WorldManager : MonoBehaviour {
         float density = worldSize[1]/continentMargin[2];
         Vector2 st = new(tilePos.x + perlinOffset.x, tilePos.y + perlinOffset.y);
         float land = erode((st.x-worldSize[0]) / density, (st.y-worldSize[1]) / density, 5f);//, new[]{0f, density/4f});
-        if(Mathf.Abs(tilePos.x) > worldSize[0]/2f || Mathf.Abs(tilePos.y) > worldSize[1]/2f) land = 0f;
+        if(Mathf.Abs(tilePos.x) > worldSize[0]/2f || Mathf.Abs(tilePos.y) > worldSize[1]/2f) land *= worldSize[2];
         return Mathf.Lerp( 0f, 1f, land);
     }
 
@@ -275,53 +271,65 @@ public class WorldManager : MonoBehaviour {
     public biomeData[] biomesToLoad;
     public static biomeData[] loadedBiomes;
 
-    public static Vector3 getBiome(Vector2 tilePos){
-        float[] errosionFactor = {
-            tectonicFloat((tilePos.x + perlinOffset.x) / biomeSize[0], (tilePos.y + perlinOffset.y) / biomeSize[0], new float[]{biomeSize[0], biomeSize[0]}),
-            erode((tilePos.y + perlinOffset.y) / biomeSize[1], (tilePos.x + perlinOffset.x) / biomeSize[1], 1f)};
-        errosionFactor[0] *= getContinentNormalized(tilePos);
-        float sector = Mathf.Clamp(errosionFactor[0] * 1.5f * loadedBiomes.Length-.1f, 0f, loadedBiomes.Length-.1f);
+    public static Vector3 getBiome(Vector2 tilePos) {
+        float[] erosionFactors = {
+            erodeTectonics((tilePos.x + perlinOffset.x) / biomeSize[0], (tilePos.y + perlinOffset.y) / biomeSize[0], 10f, new float[]{biomeSize[0], biomeSize[0]}),
+            erode((tilePos.y + perlinOffset.y) / biomeSize[1], (tilePos.x + perlinOffset.x) / biomeSize[1], 1f)
+        };
+        erosionFactors[0] *= getContinentNormalized(tilePos);
+
+        float sector = Mathf.Clamp(erosionFactors[0] * 1.5f * loadedBiomes.Length - 0.1f, 0f, loadedBiomes.Length - 0.1f);
         biomeData bd = loadedBiomes[(int)sector];
-        int aot =  bd.availableGroundTiles.Length;
+        int aot = bd.availableGroundTiles.Length;
         float coastline = bd.coastline;
         float partition;
-        float saturation;
-        float water = Mathf.Clamp(getWater(tilePos, 1)*aot*2, 0f, aot-1);
-        if(water < 1f) partition = water * coastline;
-        else partition = Mathf.Clamp(coastline + errosionFactor[1] * (aot-.1f-coastline), 0f, aot-.1f);
-        try {
-            tileData refTile = loadedTiles[bd.availableGroundTiles[(int)partition]];
-            switch(refTile.saturationMethod){
-                case 2: saturation = Mathf.PerlinNoise((tilePos.y + perlinOffset.y) / 5f, (tilePos.x + perlinOffset.x) / 5f)%1f; break; // flower field
-                case 1: saturation = Mathf.Abs(Mathf.Cos(partition%1f*Mathf.PI)); break; // sinus proximity
-                default: saturation = partition%1f; break; // proximity
-            }
-            return new Vector3(bd.availableGroundTiles[(int)partition], saturation, (int)sector);
-        } catch (Exception e) {
-            Debug.LogError("Biome progression breached " + sector + " (errosion " + errosionFactor[0] + ") - " + partition + "/" + aot + " (errosion " + errosionFactor[1] + ")\n" + e);
-            return Vector2.zero;
+
+        float water = Mathf.Clamp(getWater(tilePos, 1) * aot * 2, 0f, aot - 1);
+        if (water < 1f) {
+            partition = water * coastline;
+        } else {
+            partition = Mathf.Clamp(coastline + erosionFactors[1] * (aot - 0.1f - coastline), 0f, aot - 0.1f);
         }
-        //return Mathf.Lerp(1f, Mathf.Clamp(7f, 0f, getWater(tilePos)*14f), erode((tilePos.x * 3.333f + perlinOffset.y) / biomeSize, (tilePos.y * 3.333f + perlinOffset.x) / biomeSize, 1f) % 1f );
+
+        float saturation;
+        float partitionFraction = partition % 1f;
+        int partitionIndex = (int)partition;
+
+        switch (loadedTiles[bd.availableGroundTiles[partitionIndex]].saturationMethod) {
+            case 2:
+                saturation = Mathf.PerlinNoise((tilePos.y + perlinOffset.y) / 15f, (tilePos.x + perlinOffset.x) / 15f) % 1f;
+                break; // flower field
+            case 1:
+                saturation = Mathf.Abs(Mathf.Cos(partitionFraction * Mathf.PI))%1f;
+                break; // sinus proximity
+            default:
+                saturation = partitionFraction;
+                break; // proximity
+        }
+
+        return new Vector3(bd.availableGroundTiles[partitionIndex], saturation, (int)sector);
+    }
+
+    public static float getBiomeQuick(Vector2 tilePos){
+        float erosionFactor = erodeTectonics((tilePos.x + perlinOffset.x) / biomeSize[0], (tilePos.y + perlinOffset.y) / biomeSize[0], 10f, new float[]{biomeSize[0], biomeSize[0]});
+        erosionFactor *= getContinentNormalized(tilePos);
+        float sector = Mathf.Clamp(erosionFactor * 1.5f * loadedBiomes.Length - 0.1f, 0f, loadedBiomes.Length - 0.1f);
+        return sector;
     }
 
     public static tileObject checkForObject(Cell target){
         tileData ground = target.ground;
-        int choosen = (int)(saturatedPerlin(target.getPos().y / ground.chanceFO[1], target.getPos().x / ground.chanceFO[1], 1f) * ground.possibleObjects.Length-0.1f);
+        //int choosen = (int)(saturatedPerlin(target.getPos().y / ground.chanceFO[1], target.getPos().x / ground.chanceFO[1], 1f) * ground.possibleObjects.Length-0.1f);
+        int choosen = (int)(Mathf.PerlinNoise(target.getPos().y / ground.chanceFO[1], target.getPos().x / ground.chanceFO[1])*3.3f % ground.possibleObjects.Length);
         float chance = erode(target.getPos().x / ground.chanceFO[1], target.getPos().y / ground.chanceFO[1], 10f);
-        try {
-            if (1f - chance <= ground.chanceFO[0]) return loadedObjects[ground.possibleObjects[choosen]];
-            else return null;
-        } catch (Exception e) {
-            Debug.LogError("can't get tile object, index error. Ground possible objects " + ground.possibleObjects.Length + ", your index " + choosen + "\n" + e);
-            return null;
-        }
-        
+        if (1f - chance <= ground.chanceFO[0]) return loadedObjects[ground.possibleObjects[choosen]];
+        else return null;
     }
 
-    static float riverDensity = 10000f;
-    static float[] riverMargin = {0.45f, 0.5f, 0.05f};
+    public static float riverDensity = 10000f;
+    public static float[] riverMargin = {0.45f, 0.5f, 0.05f};
     public static float riverBias(Vector2 Pos){
-        float riverBase = erodeTectonics((Pos.y * 3.333f - perlinOffset.x) / riverDensity, (Pos.x * 3.333f - perlinOffset.y) / riverDensity, 10f, new[]{100f, 200f});
+        float riverBase = erodeTectonics((Pos.y - perlinOffset.x) / riverDensity, (Pos.x - perlinOffset.y) / riverDensity, 10f, new[]{100f, 200f});
         if(riverBase >= riverMargin[0] && riverBase <= riverMargin[1]) return Mathf.Pow( Mathf.Sin((riverBase-riverMargin[0]) / riverMargin[2] * Mathf.PI) , 3f);
         else return 0f;
     }

@@ -63,10 +63,20 @@ public class CanvasScript : MonoBehaviour {
                 break;
             case "Spawn":
                 WM.Initialize();
+                shiftZoom[0] = worldSize[1] / 480f;
                 mapEnable = true;
                 break;
             case "InfiniteWorld":
                 worldSize[2] = (worldSize[2]+1f)%2f;
+                break;
+            case "BiomeColor":
+                showBiomes[0] = !showBiomes[0];
+                if(showBiomes[0]) textShowBiomes.text = "Map color: biomes";
+                else textShowBiomes.text = "Map color: ground tiles";
+                break;
+            case "FindPlayer":
+                Offset[0] = MainPlayer.position;
+                shiftZoom[0] = 1f;
                 break;
         }
     }
@@ -105,7 +115,9 @@ public class CanvasScript : MonoBehaviour {
     // Options
 
     // Map stuff
-    bool showBiomes = true;
+    bool[] showBiomes = {true, true};
+    [SerializeField] TextMeshProUGUI textShowBiomes;
+    [SerializeField] TextMeshProUGUI MapHeader;
     [SerializeField] Transform MapAnchor;
     [SerializeField] RectTransform MapCoorData;
     Text mcdText;
@@ -124,7 +136,7 @@ public class CanvasScript : MonoBehaviour {
             shiftZoom = new[]{BlocksPerPixel, 1f};
         }
         if(!MapTexture){
-            TextureSize = new[]{Screen.width, Screen.height};
+            TextureSize = new[]{1024, 480};
             Texture2D nT = new Texture2D(TextureSize[0], TextureSize[1]);
             MapTexture = nT;
             Map.material.SetTexture("_MainTex", nT);
@@ -137,8 +149,11 @@ public class CanvasScript : MonoBehaviour {
         Color biomeColor = Color.blue;
         Vector2 e = Offset[0] + new Vector2(offsetedBlock[0] * BlocksPerPixel, offsetedBlock[1] * BlocksPerPixel);
         if(getWater(e) > 0f) {
-            if(showBiomes) biomeColor = loadedBiomes[(int)getBiomeQuick(e)].biomeColor;
-            else biomeColor = loadedTiles[(int)getBiomeQuick(e)].tileColor;
+            if(showBiomes[0]) biomeColor = loadedBiomes[(int)getBiomeQuick(e)].biomeColor;
+            else {
+                Vector3 bi = getBiome(e);
+                biomeColor = loadedTiles[(int)bi.x].tileColor;
+            }
         }
         MapTexture.SetPixel(mapLoad[0]%TextureSize[0], mapLoad[0]/TextureSize[0], biomeColor);
         mapLoad[0]++;
@@ -170,7 +185,18 @@ public class CanvasScript : MonoBehaviour {
                 Offset[0] = pointedPos;
                 MainPlayer.position = pointedPos;
                 GenerateMapTexture();
-                LoadingScreen.localScale = Vector3.zero;
+                if(LoadingScreen.localScale.x > 0f){
+                    LoadingScreen.localScale = Vector3.zero;
+                    MapHeader.text = "World map";
+                    mapEnable = false;
+                    shiftZoom[0] = 1f;
+                }
+                
+            }
+
+            if(showBiomes[0] != showBiomes[1]){
+                showBiomes[1] = showBiomes[0];
+                GenerateMapTexture();
             }
 
             if(Input.mouseScrollDelta.y != 0f)  shiftZoom = new[]{Mathf.Clamp(shiftZoom[0] - Input.mouseScrollDelta.y, 1f, Mathf.Infinity), 1f};

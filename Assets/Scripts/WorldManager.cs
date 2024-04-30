@@ -7,6 +7,7 @@ using Random=UnityEngine.Random;
 using UnityEngine.UI;
 using static getStatic.WorldManager;
 using Unity.Mathematics;
+using System.Linq;
 
 namespace getStatic {
 public class WorldManager : MonoBehaviour {
@@ -22,6 +23,7 @@ public class WorldManager : MonoBehaviour {
         public int setMapSize, setChunkSize, setObjSize, maxCamDist, pushDist;
         public Color warningColor;
     };
+    public int clampFPS;
     
     // Randomizer
     public int Seed = 999999;
@@ -132,8 +134,9 @@ public class WorldManager : MonoBehaviour {
     }
 
     public static Color32[] getTM(int biomeID, float mapLerp){
+        mapLerp = Mathf.Clamp(mapLerp, 0f, 1f);
         pixelMap got = loadedTiles[biomeID].acquiredTiles;
-        return got.acquiredTiles[got.properTiles[(int)(mapLerp * (got.acquiredTiles.Length-0.1f))]].Data;
+        return got.acquiredTiles[got.properTiles[(int)(mapLerp * (got.acquiredTiles.Length-.1f))]].Data;
     }
     // Map tiles sprites
 
@@ -151,13 +154,14 @@ public class WorldManager : MonoBehaviour {
             return objTra[2]/32 * POV.right + objTra[3]/32 * POV.up; 
         }
         public float getZ(Vector3 up, Vector3 pos, float dist){
-            return (dist/2f + Vector3.Dot(up, pos)) / dist;
+            return ((dist/2f + Vector3.Dot(up, pos)) / dist) + 1f;
         }
         public Texture2D getTexture(){ return objectSprite; }
     }
     // Map objects
 
     void Start(){
+        Application.targetFrameRate = clampFPS;
         MainCamera = POV.GetComponent<Camera>();
         waterColors = new Material[2];
         waterColors = new Material[]{
@@ -283,14 +287,19 @@ public class WorldManager : MonoBehaviour {
         Vector2 st = new(tilePos.x + perlinOffset.x, tilePos.y + perlinOffset.y);
         float land = erode((st.x-worldSize[0]) / density, (st.y-worldSize[1]) / density, 5f);//, new[]{0f, density/4f});
         if(Mathf.Abs(tilePos.x) > worldSize[0]/2f || Mathf.Abs(tilePos.y) > worldSize[1]/2f) land *= worldSize[2];
-        return Mathf.Lerp( 0f, 1f, land);
+        return land;
     }
 
     public static float getLand(Vector2 tilePos){
         Vector2 st = tectonic((tilePos.x + perlinOffset.x) / islandMargin[2], (tilePos.y + perlinOffset.y) / islandMargin[2], new[]{10f, 10f});
         float land = Mathf.Pow( erode(st.x, st.y, 5f) , 2f );
         return Mathf.Clamp( Mathf.Lerp(islandMargin[0], islandMargin[1], land * getContinent(tilePos)) , 0f, 1f);
-        //return Mathf.Clamp( Mathf.Lerp(islandMargin[0], islandMargin[1], Mathf.Pow( Mathf.PerlinNoise((tilePos.x * 0.333f + perlinOffset.x) / islandMargin[2], (tilePos.y * 0.333f + perlinOffset.y) / islandMargin[2]) , 2f )) , 0f, 1f);
+    }
+
+    public static float getLandNormalized(Vector2 tilePos){
+        Vector2 st = tectonic((tilePos.x + perlinOffset.x) / islandMargin[2], (tilePos.y + perlinOffset.y) / islandMargin[2], new[]{10f, 10f});
+        float land = Mathf.Pow( erode(st.x, st.y, 5f) , 2f );
+        return Mathf.Clamp( Mathf.Lerp(0f, 1f, land * getContinent(tilePos)) , 0f, 1f);
     }
 
     [System.Serializable]
@@ -300,6 +309,7 @@ public class WorldManager : MonoBehaviour {
         public Color32 biomeColor;
         public float coastline;
         public int[] availableGroundTiles;
+        public int partitionMethond = 1;
     }
 
     public biomeData[] biomesToLoad;
@@ -308,21 +318,23 @@ public class WorldManager : MonoBehaviour {
     public static Vector3 getBiome(Vector2 tilePos) {
         float[] erosionFactors = {
             erodeTectonics((tilePos.x + perlinOffset.x) / biomeSize[0], (tilePos.y + perlinOffset.y) / biomeSize[0], 10f, new float[]{biomeSize[0], biomeSize[0]}),
-            erode((tilePos.y + perlinOffset.y) / biomeSize[1], (tilePos.x + perlinOffset.x) / biomeSize[1], 1f)
+            0f
         };
         erosionFactors[0] *= getContinentNormalized(tilePos);
-
-        float sector = Mathf.Clamp(erosionFactors[0] * 1.5f * loadedBiomes.Length - 0.1f, 0f, loadedBiomes.Length - 0.1f);
+        float sector = Mathf.Clamp(erosionFactors[0] * 2f * loadedBiomes.Length - 0.1f, 0f, loadedBiomes.Length - 0.1f);
         biomeData bd = loadedBiomes[(int)sector];
         int aot = bd.availableGroundTiles.Length;
         float coastline = bd.coastline;
         float partition;
-
-        float water = Mathf.Clamp(getWater(tilePos, 1) * aot * 2, 0f, aot - 1);
-        if (water < 1f) {
-            partition = water * coastline;
+        float water = getWater(tilePos);//Mathf.Clamp(getWater(tilePos, 1) * aot * 2, 0f, aot - 1);
+        if (water < .2f) {
+            partition = water * 5f * coastline;
         } else {
-            partition = coastline + erosionFactors[1] * (aot - 0.1f - coastline); // may be clamped
+            switch(bd.partitionMethond){
+                case 2: erosionFactors[1] = sector%1f * 2f % 1f; break;
+                default: erosionFactors[1] = erode((tilePos.y + perlinOffset.y) / biomeSize[1], (tilePos.x + perlinOffset.x) / biomeSize[1], 1f); break;
+            }
+            partition = Mathf.Lerp(coastline, aot-.1f, erosionFactors[1]);//coastline + (erosionFactors[1] * (aot - 0.1f - coastline)); // may be clamped
         }
 
         float saturation;
@@ -331,10 +343,10 @@ public class WorldManager : MonoBehaviour {
 
         switch (loadedTiles[bd.availableGroundTiles[partitionIndex]].saturationMethod) {
             case 2:
-                saturation = Mathf.PerlinNoise((tilePos.y + perlinOffset.y) / 15f, (tilePos.x + perlinOffset.x) / 15f) % 1f;
+                saturation = Mathf.PerlinNoise((tilePos.y + perlinOffset.y) / 8f, (tilePos.x + perlinOffset.x) / 8f) % 1f;
                 break; // flower field
             case 1:
-                saturation = Mathf.Abs(Mathf.Cos(partitionFraction * Mathf.PI))%1f;
+                saturation = Mathf.Abs(Mathf.Sin(partitionFraction * Mathf.PI));
                 break; // sinus proximity
             default:
                 saturation = partitionFraction;
@@ -347,16 +359,16 @@ public class WorldManager : MonoBehaviour {
     public static float getBiomeQuick(Vector2 tilePos){
         float erosionFactor = erodeTectonics((tilePos.x + perlinOffset.x) / biomeSize[0], (tilePos.y + perlinOffset.y) / biomeSize[0], 10f, new float[]{biomeSize[0], biomeSize[0]});
         erosionFactor *= getContinentNormalized(tilePos);
-        float sector = Mathf.Clamp(erosionFactor * 1.5f * loadedBiomes.Length - 0.1f, 0f, loadedBiomes.Length - 0.1f);
+        float sector = Mathf.Clamp(erosionFactor * 2f * loadedBiomes.Length - 0.1f, 0f, loadedBiomes.Length - 0.1f);
         return sector;
     }
 
     public static tileObject checkForObject(Cell target){
         tileData ground = target.ground;
-        //int choosen = (int)(saturatedPerlin(target.getPos().y / ground.chanceFO[1], target.getPos().x / ground.chanceFO[1], 1f) * ground.possibleObjects.Length-0.1f);
-        int choosen = (int)(Mathf.PerlinNoise(target.getPos().y / ground.chanceFO[1], target.getPos().x / ground.chanceFO[1])*3.3f % ground.possibleObjects.Length);
+        float Length = ground.possibleObjects.Length;
+        float choosen = Mathf.Clamp(Mathf.PerlinNoise(target.getPos().y / ground.chanceFO[1], target.getPos().x / ground.chanceFO[1]) * Length* 1.5f, 0f, Length-.1f);
         float chance = erode(target.getPos().x / ground.chanceFO[1], target.getPos().y / ground.chanceFO[1], 10f);
-        if (1f - chance <= ground.chanceFO[0]) return loadedObjects[ground.possibleObjects[choosen]];
+        if (1f - chance <= ground.chanceFO[0]) return loadedObjects[ground.possibleObjects[(int)choosen]];
         else return null;
     }
 

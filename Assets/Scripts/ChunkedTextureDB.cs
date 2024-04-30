@@ -136,16 +136,17 @@ public class ChunkedTextureDB : DrawBase {
         }
 
         if(x%chunkSize == chunkMargin[0] && y%chunkSize == chunkMargin[1]){
-            int[] getOld = new[]{MapSize/chunkSize - 1 - x/chunkSize, MapSize/chunkSize - 1 - y/chunkSize};
+            int[] getOld = new[]{x/chunkSize, y/chunkSize};
             int[] pushOld = new[]{(int)(diff.x/chunkSize), (int)(diff.y/chunkSize)};
             if(needRewrite[x/chunkSize, y/chunkSize] == 1){
                 setChunk(
                     blur, // xy for bl - xy for ur
                     getOld
                 );
+                needRewrite[x/chunkSize, y/chunkSize] = 0;
             } else {
                 copyChunk(
-                    new[]{getOld[0]+pushOld[0], getOld[1]+pushOld[0]},
+                    new[]{getOld[0]+pushOld[0], getOld[1]+pushOld[1]},
                     getOld
                 );
             }
@@ -197,8 +198,10 @@ public class ChunkedTextureDB : DrawBase {
 
     void copyChunk(int[] from, int[] to){
         chunkTransforms[to[0], to[1]].position = chunkTransforms[from[0], from[1]].position;
+        chunkTransforms[from[0], from[1]].localScale = Vector3.zero;
         chunkTransforms[to[0], to[1]].localScale = Vector3.one * chunkSize;
-        chunkTextures[to[0], to[1]].LoadRawTextureData(chunkTextures[from[0], from[0]].GetRawTextureData());
+        chunkTextures[to[0], to[1]].SetPixels32(chunkTextures[from[0], from[1]].GetPixels32());
+        chunkTextures[to[0], to[1]].Apply();
     }
 
     void setTile(Cell target, Vector3 tChunk, Texture2D tTexture){

@@ -14,11 +14,13 @@ public class CanvasScript : MonoBehaviour {
     public Transform LoadingScreen;
     PlayerScript mp;
     public WorldManager WM;
+    Canvas scaler;
     
     void Start(){
        GenerateMapTexture();
        mcdText = MapCoorData.GetChild(0).GetComponent<Text>();
        mp = MainPlayer.GetComponent<PlayerScript>();
+       scaler = this.GetComponent<Canvas>();
     }
 
     void Update(){
@@ -153,7 +155,7 @@ public class CanvasScript : MonoBehaviour {
             mp.stun = Time.deltaTime*4f;
 
             float shiftPower = 25f;
-            Vector2 mousePos = (Input.mousePosition * this.GetComponent<CanvasScaler>().scaleFactor) - new Vector3(Screen.width/2f, Screen.height/2f);
+            Vector2 mousePos = (Input.mousePosition - new Vector3(Screen.width/2f, Screen.height/2f)) / scaler.scaleFactor;
             Vector2 pointedPos = (mousePos * BlocksPerPixel) + Offset[0];
             MapCoorData.anchoredPosition = mousePos;
             mcdText.text = mcdString(pointedPos);

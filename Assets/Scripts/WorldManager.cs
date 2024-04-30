@@ -6,6 +6,7 @@ using UnityEngine;
 using Random=UnityEngine.Random;
 using UnityEngine.UI;
 using static getStatic.WorldManager;
+using Unity.Mathematics;
 
 namespace getStatic {
 public class WorldManager : MonoBehaviour {
@@ -72,9 +73,15 @@ public class WorldManager : MonoBehaviour {
     // Loader
 
     // References
+    Camera MainCamera;
     [SerializeField] DrawBase drawingMechanism;
     public Transform POV;
     float POVscroll = 10f;
+
+    // Big textures
+    public Transform Skybox;
+    public Transform Water;
+    Material[] waterColors;
 
     // Map tiles sprites
     public tileData[] tilesToLoad;
@@ -150,6 +157,15 @@ public class WorldManager : MonoBehaviour {
     }
     // Map objects
 
+    void Start(){
+        MainCamera = POV.GetComponent<Camera>();
+        waterColors = new Material[2];
+        waterColors = new Material[]{
+            waterColors[0] = Water.GetComponent<MeshRenderer>().material,
+            waterColors[1] = Water.GetChild(0).GetComponent<MeshRenderer>().material
+        };
+    }
+
     public void Initialize(){
 
         loadedTiles = new tileData[tilesToLoad.Length];
@@ -190,6 +206,24 @@ public class WorldManager : MonoBehaviour {
             //    Initialize();
             //}
         }
+    }
+
+    void LateUpdate(){
+        setBigTextures();
+    }
+
+    void setBigTextures(){
+        // Skybox
+        float skySize = MainCamera.orthographicSize;
+        Skybox.position = new Vector3(POV.position.x, POV.position.y, 0f) - (POV.up * (19.2f * skySize/100f));
+        Skybox.localScale = Vector3.one * skySize/5f;
+
+        // Water
+        Vector3 waves = new Vector3(Mathf.Sin(Time.timeSinceLevelLoad/10f), Mathf.Cos(Time.timeSinceLevelLoad/15f)) * 5f;
+        Water.position = new Vector3(Mathf.Ceil(POV.position.x/32f)*32f - 16f, Mathf.Ceil(POV.position.y/32f)*32f - 16f, 5f) + waves;
+        float sunAngle = Mathf.Sin((POV.eulerAngles.z/360f) * Mathf.PI);
+        waterColors[0].color = Color.black * sunAngle;
+        waterColors[1].color = Color.white * (1f-sunAngle);
     }
 
     float psLerp = 0f;
@@ -288,7 +322,7 @@ public class WorldManager : MonoBehaviour {
         if (water < 1f) {
             partition = water * coastline;
         } else {
-            partition = Mathf.Clamp(coastline + erosionFactors[1] * (aot - 0.1f - coastline), 0f, aot - 0.1f);
+            partition = coastline + erosionFactors[1] * (aot - 0.1f - coastline); // may be clamped
         }
 
         float saturation;

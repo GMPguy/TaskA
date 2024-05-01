@@ -265,7 +265,7 @@ public class WorldManager : MonoBehaviour {
     // Stats monitor
 
     // World generation values
-    static float[] islandMargin = {1f, -1f, 200};
+    public static float[] islandMargin = {1f, -1f, 200};
     static float islandSize = 20;
     public static float[] biomeSize = {4000, 20f, 0f}; // biome size, biome diversity size, is world infinited
     public static float getHeight(Vector2 tilePos){
@@ -317,18 +317,21 @@ public class WorldManager : MonoBehaviour {
 
     public static Vector3 getBiome(Vector2 tilePos) {
         float[] erosionFactors = {
-            erodeTectonics((tilePos.x + perlinOffset.x) / biomeSize[0], (tilePos.y + perlinOffset.y) / biomeSize[0], 10f, new float[]{biomeSize[0], biomeSize[0]}),
+            erodeTectonics((tilePos.x + perlinOffset.x) / biomeSize[0], (tilePos.y + perlinOffset.y) / biomeSize[0], 3f, new float[]{biomeSize[0]*3f, biomeSize[0]}),
             0f
         };
-        erosionFactors[0] *= getContinentNormalized(tilePos);
-        float sector = Mathf.Clamp(erosionFactors[0] * 2f * loadedBiomes.Length - 0.1f, 0f, loadedBiomes.Length - 0.1f);
+        float continentalBias = getContinentNormalized(tilePos);
+        erosionFactors[0] *= continentalBias;
+        float equatorBias = Mathf.Sin((tilePos.y / worldSize[1]) * Mathf.PI);
+        erosionFactors[0] *= equatorBias;
+        float sector = Mathf.Clamp(erosionFactors[0] * 2f * loadedBiomes.Length - 0.1f, 0f, (loadedBiomes.Length - 0.1f) * equatorBias);
         biomeData bd = loadedBiomes[(int)sector];
         int aot = bd.availableGroundTiles.Length;
         float coastline = bd.coastline;
         float partition;
         float water = getWater(tilePos);//Mathf.Clamp(getWater(tilePos, 1) * aot * 2, 0f, aot - 1);
-        if (water < .2f) {
-            partition = water * 5f * coastline;
+        if (water < .1f) {
+            partition = water * 10f * coastline;
         } else {
             switch(bd.partitionMethond){
                 case 2: erosionFactors[1] = sector%1f * 2f % 1f; break;
@@ -356,9 +359,15 @@ public class WorldManager : MonoBehaviour {
         return new Vector3(bd.availableGroundTiles[partitionIndex], saturation, (int)sector);
     }
 
+    public static float equatorBias = 1f;
     public static float getBiomeQuick(Vector2 tilePos){
         float erosionFactor = erodeTectonics((tilePos.x + perlinOffset.x) / biomeSize[0], (tilePos.y + perlinOffset.y) / biomeSize[0], 10f, new float[]{biomeSize[0], biomeSize[0]});
-        erosionFactor *= getContinentNormalized(tilePos);
+        float continentalBias = getContinentNormalized(tilePos);
+        erosionFactor *= continentalBias;
+        //float equatorBias = 1f;
+        if(Mathf.Abs(tilePos.y) < worldSize[1]/4f * equatorBias) erosionFactor *= Mathf.Abs(Mathf.Sin(tilePos.y / (worldSize[1]/2f * equatorBias)));
+        if (Mathf.Abs(tilePos.y) > worldSize[1]/4f + (1f-equatorBias) * (equatorBias*worldSize[1]/4f)) erosionFactor += Mathf.Abs(Mathf.Cos(((worldSize[1]/2f) - tilePos.y)) / (worldSize[1]/4f * equatorBias));
+        //erosionFactor *= equatorBias;
         float sector = Mathf.Clamp(erosionFactor * 2f * loadedBiomes.Length - 0.1f, 0f, loadedBiomes.Length - 0.1f);
         return sector;
     }

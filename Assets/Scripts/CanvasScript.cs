@@ -106,6 +106,7 @@ public class CanvasScript : MonoBehaviour {
 
     public void changeContinents(string Input){
         continentMargin[2] = float.Parse(Input);
+        islandMargin[2] = continentMargin[2]/100f;
     }
 
     public void changeRiverSize(Slider slider){

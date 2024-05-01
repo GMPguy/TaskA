@@ -1373,8 +1373,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -271, y: -290}
-  m_SizeDelta: {x: 512, y: 30}
+  m_AnchoredPosition: {x: -255, y: -290}
+  m_SizeDelta: {x: 480, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &306396000
 MonoBehaviour:
@@ -2185,7 +2185,7 @@ MonoBehaviour:
     possibleObjects: 
     chanceFO: []
   - tileID: 7
-    saturationMethod: 1
+    saturationMethod: 3
     tileName: Farmlands
     tileColor:
       serializedVersion: 2
@@ -2197,8 +2197,10 @@ MonoBehaviour:
     - {fileID: 2800000, guid: c1a180a0dd17c9e45b5f176e5442181a, type: 3}
     - {fileID: 2800000, guid: 535e8bb00fd72c44688fad588f7459aa, type: 3}
     copyTextures: 
-    possibleObjects: 
-    chanceFO: []
+    possibleObjects: 1c0000001d0000001e000000070000000d000000
+    chanceFO:
+    - 0.175
+    - 2
   - tileID: 8
     saturationMethod: 2
     tileName: Forest
@@ -2301,6 +2303,24 @@ MonoBehaviour:
     copyTextures: 
     possibleObjects: 
     chanceFO: []
+  - tileID: 14
+    saturationMethod: 2
+    tileName: Farm field
+    tileColor:
+      serializedVersion: 2
+      rgba: 4281353851
+    tileTextures:
+    - {fileID: 2800000, guid: 9b5bf7b46d6929143ae408f8960b1c9d, type: 3}
+    - {fileID: 2800000, guid: f9d4033842f6a2e49b01d09df3eebe00, type: 3}
+    - {fileID: 2800000, guid: 81b983dd2974edf4d948d478cf814de2, type: 3}
+    - {fileID: 2800000, guid: d97b0e4140db8c24da86bf89746b0dcd, type: 3}
+    - {fileID: 2800000, guid: 916d811d58c583845a82608cfcc8b7a6, type: 3}
+    - {fileID: 2800000, guid: 4a0c23ded0511794a9ce32c54bc16ccc, type: 3}
+    copyTextures: 
+    possibleObjects: 18000000190000001a0000001b000000
+    chanceFO:
+    - 0.5
+    - 2
   objectsToLoad:
   - objectID: 0
     objectName: Spruce tree
@@ -2398,6 +2418,34 @@ MonoBehaviour:
     objectName: Cactus two
     objectSprite: {fileID: 2800000, guid: 69e9a7bfb23e85643897300a2be4f3a6, type: 3}
     objTra: 60000000600000000000000030000000
+  - objectID: 24
+    objectName: Wheat one
+    objectSprite: {fileID: 2800000, guid: 493bc8a5370bdf748ab751110b148dc2, type: 3}
+    objTra: 40000000400000000000000020000000
+  - objectID: 25
+    objectName: Wheat two
+    objectSprite: {fileID: 2800000, guid: 7d6a71a93f7b3394fa11699c200ec180, type: 3}
+    objTra: 40000000400000000000000020000000
+  - objectID: 26
+    objectName: Wheat three
+    objectSprite: {fileID: 2800000, guid: 51f467278711c4749b029eefaa777967, type: 3}
+    objTra: 40000000400000000000000020000000
+  - objectID: 27
+    objectName: Wheat four
+    objectSprite: {fileID: 2800000, guid: a5c9235297d9e6441a79743dd2d2a887, type: 3}
+    objTra: 40000000400000000000000020000000
+  - objectID: 28
+    objectName: Scarecrow
+    objectSprite: {fileID: 2800000, guid: 3357e281d24cc6f438d89d9a7f3b8e50, type: 3}
+    objTra: 40000000600000000000000030000000
+  - objectID: 28
+    objectName: Scarecrow
+    objectSprite: {fileID: 2800000, guid: d281e1a004de052499ffc52ec22e824a, type: 3}
+    objTra: e0000000e00000000000000070000000
+  - objectID: 28
+    objectName: Scarecrow
+    objectSprite: {fileID: 2800000, guid: d25a19276f5682f46ad9c976a2768ffe, type: 3}
+    objTra: e0000000e00000000000000070000000
   Stats: {fileID: 4270176}
   biomesToLoad:
   - biomeID: 0
@@ -2430,8 +2478,8 @@ MonoBehaviour:
       serializedVersion: 2
       rgba: 4282440128
     coastline: 1
-    availableGroundTiles: 0000000007000000
-    partitionMethond: 1
+    availableGroundTiles: 000000000e0000000700000007000000
+    partitionMethond: 3
   - biomeID: 4
     biomeName: Forest
     biomeColor:
@@ -4797,7 +4845,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 280}
-  m_SizeDelta: {x: 1056, y: 48}
+  m_SizeDelta: {x: 992, y: 48}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &846120159
 MonoBehaviour:
@@ -4872,7 +4920,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1024, y: 480}
+  m_SizeDelta: {x: 960, y: 480}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &850251131
 MonoBehaviour:
@@ -7264,7 +7312,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1056, y: 512}
+  m_SizeDelta: {x: 992, y: 512}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1331824812
 MonoBehaviour:
@@ -7527,7 +7575,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1024, y: 480}
+  m_SizeDelta: {x: 960, y: 480}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1504978328
 MonoBehaviour:
@@ -8646,8 +8694,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 271, y: -290}
-  m_SizeDelta: {x: 512, y: 30}
+  m_AnchoredPosition: {x: 255, y: -290}
+  m_SizeDelta: {x: 480, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1717121337
 MonoBehaviour:

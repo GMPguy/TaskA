@@ -82,13 +82,13 @@ public class CanvasScript : MonoBehaviour {
     }
 
     public void changeX(string Input){
-        try{ worldSize[0] = float.Parse(Input); } 
-        catch (Exception e){ worldSize[0] = 20000f; print(e); }
+        worldSize[0] = float.Parse(Input); 
+        if(worldSize[0] > worldSize[1]) islandMargin[2] = worldSize[0]/100f;
     }
 
     public void changeY(string Input){
-        try{ worldSize[1] = float.Parse(Input); } 
-        catch (Exception e){ worldSize[1] = 20000f; print(e); }
+        worldSize[1] = float.Parse(Input); 
+        if(worldSize[1] > worldSize[0]) islandMargin[2] = worldSize[1]/100f;
     }
 
     public void changeSeed(string Input){
@@ -106,7 +106,6 @@ public class CanvasScript : MonoBehaviour {
 
     public void changeContinents(string Input){
         continentMargin[2] = float.Parse(Input);
-        islandMargin[2] = continentMargin[2]/100f;
     }
 
     public void changeRiverSize(Slider slider){
@@ -141,7 +140,7 @@ public class CanvasScript : MonoBehaviour {
             shiftZoom = new[]{BlocksPerPixel, 1f};
         }
         if(!MapTexture){
-            TextureSize = new[]{1024, 480};
+            TextureSize = new[]{960, 480};
             Texture2D nT = new Texture2D(TextureSize[0], TextureSize[1]);
             MapTexture = nT;
             Map.material.SetTexture("_MainTex", nT);

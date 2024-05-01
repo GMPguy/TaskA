@@ -161,6 +161,7 @@ public class WorldManager : MonoBehaviour {
     // Map objects
 
     void Start(){
+        if (RandomGeneration) Seed = Random.Range(1, 999999);
         Application.targetFrameRate = clampFPS;
         MainCamera = POV.GetComponent<Camera>();
         waterColors = new Material[2];
@@ -183,7 +184,6 @@ public class WorldManager : MonoBehaviour {
         tilesToLoad = new tileData[0];
         biomesToLoad = new biomeData[0];
         
-        if (RandomGeneration) Seed = Random.Range(1, 999999);
         Random.InitState(Seed);
         perlinOffset = new Vector2(Random.value* 999999f, Random.value * 999999f);
         currPos = Vector3.one*9999f;
@@ -337,8 +337,16 @@ public class WorldManager : MonoBehaviour {
             partition = water * 10f * coastline;
         } else {
             switch(bd.partitionMethond){
-                case 2: erosionFactors[1] = sector%1f * 2f % 1f; break;
-                default: erosionFactors[1] = erode((tilePos.y + perlinOffset.y) / biomeSize[1], (tilePos.x + perlinOffset.x) / biomeSize[1], 1f); break;
+                case 3:
+                    Vector2 cunkedTile = new(Mathf.Round(tilePos.y/32f) * 32f, Mathf.Round(tilePos.x/32f) * 32f);
+                    erosionFactors[1] = erode((cunkedTile.y + perlinOffset.y) / biomeSize[1], (cunkedTile.x + perlinOffset.x) / biomeSize[1], 1f); 
+                    break;
+                case 2: 
+                    erosionFactors[1] = sector%1f * 2f % 1f; 
+                    break;
+                default: 
+                    erosionFactors[1] = erode((tilePos.y + perlinOffset.y) / biomeSize[1], (tilePos.x + perlinOffset.x) / biomeSize[1], 1f); 
+                    break;
             }
             partition = Mathf.Lerp(coastline, aot-.1f, erosionFactors[1]);//coastline + (erosionFactors[1] * (aot - 0.1f - coastline)); // may be clamped
         }
@@ -348,6 +356,10 @@ public class WorldManager : MonoBehaviour {
         int partitionIndex = (int)partition;
 
         switch (loadedTiles[bd.availableGroundTiles[partitionIndex]].saturationMethod) {
+            case 3: 
+                float reguralErosion = erode((tilePos.y + perlinOffset.y) / biomeSize[1], (tilePos.x + perlinOffset.x) / biomeSize[1], 1f) % 1f; 
+                saturation = Mathf.Abs(Mathf.Sin(reguralErosion * Mathf.PI));
+                break; // sinus proximity, inverse chunks
             case 2:
                 saturation = Mathf.PerlinNoise((tilePos.y + perlinOffset.y) / 8f, (tilePos.x + perlinOffset.x) / 8f) % 1f;
                 break; // flower field
@@ -385,10 +397,10 @@ public class WorldManager : MonoBehaviour {
         else return null;
     }
 
-    public static float riverDensity = 10000f;
+    public static float riverDensity = 4000f;
     public static float[] riverMargin = {0.45f, 0.5f, 0.05f};
     public static float riverBias(Vector2 Pos){
-        float riverBase = erodeTectonics((Pos.y - perlinOffset.x) / riverDensity, (Pos.x - perlinOffset.y) / riverDensity, 10f, new[]{100f, 200f});
+        float riverBase = tectonicFloat((Pos.y - perlinOffset.x) / riverDensity, (Pos.x - perlinOffset.y) / riverDensity, new[]{100f, 200f});
         if(riverBase >= riverMargin[0] && riverBase <= riverMargin[1]) return Mathf.Pow( Mathf.Sin((riverBase-riverMargin[0]) / riverMargin[2] * Mathf.PI) , 3f);
         else return 0f;
     }

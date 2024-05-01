@@ -8,7 +8,7 @@ public class PlayerScript : MonoBehaviour {
     public Transform Capsule;
     Camera mcCamera;
     Vector3 cameraOffset;
-    float POVscroll = 5f;
+    public float POVscroll = 5f;
     public float playerSpeed = 10f;
     public float stun = 0f;
 

@@ -315,22 +315,25 @@ public class WorldManager : MonoBehaviour {
     public biomeData[] biomesToLoad;
     public static biomeData[] loadedBiomes;
 
+    public static float equatorBias = 0.5f;
     public static Vector3 getBiome(Vector2 tilePos) {
         float[] erosionFactors = {
-            erodeTectonics((tilePos.x + perlinOffset.x) / biomeSize[0], (tilePos.y + perlinOffset.y) / biomeSize[0], 3f, new float[]{biomeSize[0]*3f, biomeSize[0]}),
+            erodeTectonics((tilePos.x + perlinOffset.x) / biomeSize[0], (tilePos.y + perlinOffset.y) / biomeSize[0], 5f, new float[]{biomeSize[0], biomeSize[0]}),
             0f
         };
         float continentalBias = getContinentNormalized(tilePos);
         erosionFactors[0] *= continentalBias;
-        float equatorBias = Mathf.Sin((tilePos.y / worldSize[1]) * Mathf.PI);
-        erosionFactors[0] *= equatorBias;
-        float sector = Mathf.Clamp(erosionFactors[0] * 2f * loadedBiomes.Length - 0.1f, 0f, (loadedBiomes.Length - 0.1f) * equatorBias);
+        if(worldSize[2] < .5f){
+            if(Mathf.Abs(tilePos.y) < worldSize[1]/4f * equatorBias) erosionFactors[0] *= Mathf.Abs(Mathf.Sin(tilePos.y / (worldSize[1]/4f * equatorBias) * (Mathf.PI/2f)));
+            else if (Mathf.Abs(tilePos.y) > worldSize[1]/4f + ((1f-equatorBias) * (worldSize[1]/4f))) erosionFactors[0] = Mathf.Lerp(erosionFactors[0], Mathf.Abs(Mathf.Cos((worldSize[1]/2f - Mathf.Abs(tilePos.y)) / (worldSize[1]/4f * equatorBias) * (Mathf.PI/2f))), erosionFactors[0] *  Mathf.Abs(Mathf.Cos((worldSize[1]/2f - Mathf.Abs(tilePos.y)) / (worldSize[1]/4f * equatorBias) * (Mathf.PI/2f))));
+        }
+        float sector = Mathf.Clamp(erosionFactors[0] * 2f * loadedBiomes.Length - 0.1f, 0f, loadedBiomes.Length - 0.1f);
         biomeData bd = loadedBiomes[(int)sector];
         int aot = bd.availableGroundTiles.Length;
         float coastline = bd.coastline;
         float partition;
         float water = getWater(tilePos);//Mathf.Clamp(getWater(tilePos, 1) * aot * 2, 0f, aot - 1);
-        if (water < .1f) {
+        if (water < .1f && coastline > 0f) {
             partition = water * 10f * coastline;
         } else {
             switch(bd.partitionMethond){
@@ -359,14 +362,15 @@ public class WorldManager : MonoBehaviour {
         return new Vector3(bd.availableGroundTiles[partitionIndex], saturation, (int)sector);
     }
 
-    public static float equatorBias = 1f;
+    
     public static float getBiomeQuick(Vector2 tilePos){
-        float erosionFactor = erodeTectonics((tilePos.x + perlinOffset.x) / biomeSize[0], (tilePos.y + perlinOffset.y) / biomeSize[0], 10f, new float[]{biomeSize[0], biomeSize[0]});
+        float erosionFactor = erodeTectonics((tilePos.x + perlinOffset.x) / biomeSize[0], (tilePos.y + perlinOffset.y) / biomeSize[0], 5f, new float[]{biomeSize[0], biomeSize[0]});
         float continentalBias = getContinentNormalized(tilePos);
         erosionFactor *= continentalBias;
-        //float equatorBias = 1f;
-        if(Mathf.Abs(tilePos.y) < worldSize[1]/4f * equatorBias) erosionFactor *= Mathf.Abs(Mathf.Sin(tilePos.y / (worldSize[1]/2f * equatorBias)));
-        if (Mathf.Abs(tilePos.y) > worldSize[1]/4f + (1f-equatorBias) * (equatorBias*worldSize[1]/4f)) erosionFactor += Mathf.Abs(Mathf.Cos(((worldSize[1]/2f) - tilePos.y)) / (worldSize[1]/4f * equatorBias));
+        if(worldSize[2] < .5f){
+            if(Mathf.Abs(tilePos.y) < worldSize[1]/4f * equatorBias) erosionFactor *= Mathf.Abs(Mathf.Sin(tilePos.y / (worldSize[1]/4f * equatorBias) * (Mathf.PI/2f)));
+            else if (Mathf.Abs(tilePos.y) > worldSize[1]/4f + ((1f-equatorBias) * (worldSize[1]/4f))) erosionFactor = Mathf.Lerp(erosionFactor, Mathf.Abs(Mathf.Cos((worldSize[1]/2f - Mathf.Abs(tilePos.y)) / (worldSize[1]/4f * equatorBias) * (Mathf.PI/2f))), erosionFactor *  Mathf.Abs(Mathf.Cos((worldSize[1]/2f - Mathf.Abs(tilePos.y)) / (worldSize[1]/4f * equatorBias) * (Mathf.PI/2f))));
+        }
         //erosionFactor *= equatorBias;
         float sector = Mathf.Clamp(erosionFactor * 2f * loadedBiomes.Length - 0.1f, 0f, loadedBiomes.Length - 0.1f);
         return sector;

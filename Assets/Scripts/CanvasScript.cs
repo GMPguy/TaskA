@@ -113,6 +113,10 @@ public class CanvasScript : MonoBehaviour {
         riverMargin[0] = Mathf.Lerp(0.5f, 0.3f, slider.value);
         riverMargin[2] = 0.5f - riverMargin[0];
     }
+
+    public void changeEquatorBias(Slider slider){
+        equatorBias = slider.value;
+    }
     // Options
 
     // Map stuff
@@ -185,6 +189,7 @@ public class CanvasScript : MonoBehaviour {
             } else if (Input.GetMouseButtonDown(1)){
                 Offset[0] = pointedPos;
                 MainPlayer.position = pointedPos;
+                mp.POVscroll = WM.renderSettings[WM.currRenderSetting].maxCamDist;
                 GenerateMapTexture();
                 if(LoadingScreen.localScale.x > 0f){
                     LoadingScreen.localScale = Vector3.zero;

@@ -6,6 +6,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using static getStatic.WorldManager;
+using Random=UnityEngine.Random;
 
 public class CanvasScript : MonoBehaviour {
 
@@ -82,30 +83,50 @@ public class CanvasScript : MonoBehaviour {
     }
 
     public void changeX(string Input){
-        worldSize[0] = float.Parse(Input); 
-        if(worldSize[0] > worldSize[1]) islandMargin[2] = worldSize[0]/100f;
+        try{
+            worldSize[0] = float.Parse(Input); 
+            if(worldSize[0] > worldSize[1]) islandMargin[2] = worldSize[0]/100f;
+        } catch (Exception e) {
+            worldSize[0] = 20000f;
+            if(worldSize[0] > worldSize[1]) islandMargin[2] = worldSize[0]/100f;
+            print("Wrong input for X map size.\n"+e);
+        }
     }
 
     public void changeY(string Input){
-        worldSize[1] = float.Parse(Input); 
-        if(worldSize[1] > worldSize[0]) islandMargin[2] = worldSize[1]/100f;
+        try{
+            worldSize[1] = float.Parse(Input); 
+            if(worldSize[1] > worldSize[0]) islandMargin[2] = worldSize[1]/100f;
+        } catch (Exception e) {
+            worldSize[1] = 20000f;
+            if(worldSize[1] > worldSize[0]) islandMargin[2] = worldSize[1]/100f;
+            print("Wrong input for X map size.\n"+e);
+        }
     }
 
     public void changeSeed(string Input){
-        if(Input.Length > 9) WM.Seed = int.Parse(Input[..9]);
-        else WM.Seed = int.Parse(Input);
+        try{
+            if(Input.Length > 9) WM.Seed = int.Parse(Input[..9]);
+            else WM.Seed = int.Parse(Input);
+        } catch (Exception e){
+            WM.Seed = Random.Range(0, 999999);
+            print("Wrong input for seed.\n"+e);
+        }
     }
 
     public void changeBiome(string Input){
-        biomeSize[0] = float.Parse(Input);
+        try{ biomeSize[0] = float.Parse(Input); }
+        catch (Exception e) {biomeSize[0] = 4000f; print("Wrong input for biome size.\n"+e);}
     }
 
     public void changeRiverDensity(string Input){
-        riverDensity = float.Parse(Input);
+        try{ riverDensity = float.Parse(Input); }
+        catch (Exception e) {riverDensity = 1000f; print("Wrong input for river density.\n"+e);}
     }
 
     public void changeContinents(string Input){
-        continentMargin[2] = float.Parse(Input);
+        try{ continentMargin[2] = float.Parse(Input); }
+        catch (Exception e) {continentMargin[2] = 5f; print("Wrong input for continents.\n"+e);}
     }
 
     public void changeRiverSize(Slider slider){
@@ -138,6 +159,7 @@ public class CanvasScript : MonoBehaviour {
         if(shiftZoom[0] != BlocksPerPixel){
             BlocksPerPixel = (int)shiftZoom[0];
             shiftZoom = new[]{BlocksPerPixel, 1f};
+            if(LoadingScreen.localScale.x < 0.5f) MapHeader.text = "World map - scale 1:" + (int)BlocksPerPixel;
         }
         if(!MapTexture){
             TextureSize = new[]{960, 480};
@@ -192,7 +214,6 @@ public class CanvasScript : MonoBehaviour {
                 GenerateMapTexture();
                 if(LoadingScreen.localScale.x > 0f){
                     LoadingScreen.localScale = Vector3.zero;
-                    MapHeader.text = "World map";
                     mapEnable = false;
                     shiftZoom[0] = 1f;
                 }
@@ -204,7 +225,8 @@ public class CanvasScript : MonoBehaviour {
                 GenerateMapTexture();
             }
 
-            if(Input.mouseScrollDelta.y != 0f)  shiftZoom = new[]{Mathf.Clamp(shiftZoom[0] - Input.mouseScrollDelta.y, 1f, Mathf.Infinity), 1f};
+            if(Input.mouseScrollDelta.y != 0f && Input.GetKey(KeyCode.RightShift))  shiftZoom = new[]{Mathf.Clamp(shiftZoom[0] - Input.mouseScrollDelta.y * 10f, 1f, Mathf.Infinity), 1f};
+            else if(Input.mouseScrollDelta.y != 0f)  shiftZoom = new[]{Mathf.Clamp(shiftZoom[0] - Input.mouseScrollDelta.y, 1f, Mathf.Infinity), 1f};
             if(shiftZoom[0] != BlocksPerPixel){
                 Map.GetComponent<RectTransform>().localScale = Vector2.one * (BlocksPerPixel / shiftZoom[0]);
                 shiftZoom[1] -= Time.deltaTime;

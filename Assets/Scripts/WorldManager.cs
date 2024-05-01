@@ -315,7 +315,7 @@ public class WorldManager : MonoBehaviour {
     public biomeData[] biomesToLoad;
     public static biomeData[] loadedBiomes;
 
-    public static float equatorBias = 0.5f;
+    public static float equatorBias = 1f;
     public static Vector3 getBiome(Vector2 tilePos) {
         float[] erosionFactors = {
             erodeTectonics((tilePos.x + perlinOffset.x) / biomeSize[0], (tilePos.y + perlinOffset.y) / biomeSize[0], 5f, new float[]{biomeSize[0], biomeSize[0]}),

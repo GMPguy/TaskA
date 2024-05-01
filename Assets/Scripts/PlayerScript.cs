@@ -23,7 +23,7 @@ public class PlayerScript : MonoBehaviour {
             stun = Mathf.Clamp(stun -= Time.deltaTime, 0f, Mathf.Infinity);
         } else {
             this.transform.position += (MainCamera.right * Input.GetAxis("Horizontal") + MainCamera.up * Input.GetAxis("Vertical")) * playerSpeed * Time.deltaTime;
-            if(Input.GetMouseButton(1)) cameraOffset -= new Vector3(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"), -2f);
+            if(Input.GetMouseButton(1)) cameraOffset -= MainCamera.right * Input.GetAxis("Mouse X") + MainCamera.up * Input.GetAxis("Mouse Y");
             if(Input.GetMouseButton(2)) MainCamera.Rotate(Vector3.forward * Input.GetAxis("Mouse X") * 4f);
             if(Input.mouseScrollDelta.y != 0f) POVscroll = Mathf.Clamp(POVscroll - Input.mouseScrollDelta.y, 5f, 100f);
         }

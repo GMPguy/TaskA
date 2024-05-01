@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using static getStatic.WorldManager;
@@ -205,7 +206,11 @@ public class ChunkedTextureDB : DrawBase {
     }
 
     void setTile(Cell target, Vector3 tChunk, Texture2D tTexture){
-        if(!target.isWater) StampImage( target.getPos(), tChunk, tTexture, getTM(target.ground.tileID, target.biomeSaturation));
+        if(!target.isWater) {
+            Vector2 cp = target.getPos();
+            if(Mathf.PerlinNoise(cp.x / 2f, cp.y / 2f) % 1 > 0.5f) StampImage( target.getPos(), tChunk, tTexture, getTM(target.ground.tileID, target.biomeSaturation).Reverse().ToArray());
+            else StampImage( target.getPos(), tChunk, tTexture, getTM(target.ground.tileID, target.biomeSaturation));
+        }
         else StampColor(target.getPos(), tChunk, tTexture, Color.Lerp(new(0f, 0f, 0f, 0f), new(0f,0.1f,0.2f,1f), target.Height));
     }
 

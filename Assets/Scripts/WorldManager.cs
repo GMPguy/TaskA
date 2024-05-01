@@ -259,7 +259,7 @@ public class WorldManager : MonoBehaviour {
         if(loadChunk[0] < loadChunk[1]) result += "\nLoading tiles: " + loadChunk[0] + "/" + loadChunk[1] + " speed: " + (int)Mathf.Lerp(ParseSpeed[0], ParseSpeed[1], psLerp) + "/" + ParseSpeed[1];
         else result += "\nMap loaded";
         result += "\nLoad instance " + chungID + "\n\n" + "\nLoad offset: " + loadPos + "\nWorld offset: " + currPos + "\nCamera offset: " + POV.transform.position;
-        result += "\n\nMap size: " + MapSize + "\nRefresh trigger: " + PushDist + "\nRefresh speed: " + ParseSpeed;
+        result += "\n\nMap size: " + MapSize + "\nRefresh trigger: " + PushDist;
         return result;
     }
     // Stats monitor
